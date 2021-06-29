@@ -3,18 +3,27 @@ const Package = require("../models/Package");
 
 router.get("/", async (req, res) => {
     try {
-        const packages = await Package.find();
+        const packages = await Package.aggregate([
+            {
+                $lookup: {
+                    from: "channels",
+                    localField: "channels",
+                    foreignField: "_id",
+                    as: "channelsData",
+                },
+            },
+        ]);
         res.status(200).json(packages.filter((package) => !package.isDeleted));
     } catch (err) {
         res.status(400).json({
-            message: "Error. Please contact your administrator.",
+            message: err,
         });
     }
 });
 
 router.get("/:id", async (req, res) => {
     try {
-        const package = await Packages.findById(req.params.id);
+        const package = await Package.findById(req.params.id);
 
         !package.isDeleted
             ? res.status(200).json(package)
@@ -46,9 +55,27 @@ router.post("/", async (req, res) => {
         });
     }
 });
+//60db80f7845c413e64f383ae
+router.patch("/:id", async (req, res) => {
+    const { channels } = req.body;
 
-router.patch("/:id", (req, res) => {
-    res.send(`EDIT PACKAGE WITH PACKAGE ID: ${req.params.id}`);
+    try {
+        const package = await Package.findById(req.params.id);
+
+        if (package.isDeleted)
+            res.status(404).json({ message: "Package not found" });
+
+        const updatedPackage = await Package.findByIdAndUpdate(req.params.id, {
+            $set: { channels: channels },
+        });
+
+        updatedPackage.channels = channels;
+        res.status(200).json(updatedPackage);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
 });
 
 router.delete("/:id", async (req, res) => {
