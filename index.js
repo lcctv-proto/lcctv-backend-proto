@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const accounts = require("./routes/accounts");
+const packages = require("./routes/packages");
+const channels = require("./routes/channels");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
@@ -23,6 +25,8 @@ mongoose.connect(
 
 //Routes
 app.use("/api/accounts", accounts);
+app.use("/api/packages", packages);
+app.use("/api/channels", channels);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
