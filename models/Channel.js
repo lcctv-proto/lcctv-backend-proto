@@ -8,6 +8,7 @@ const ChannelSchema = mongoose.Schema({
     bannerImageURL: String,
     videoURL: String,
     channelImages: [String],
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Channels", ChannelSchema);

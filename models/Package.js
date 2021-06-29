@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 
 const PackageSchema = mongoose.Schema({
-    Name: String,
-    Description: String,
-    Price: Number,
-    Channels: [mongoose.Schema.Types.ObjectId],
+    name: String,
+    description: String,
+    price: Number,
+    channels: [mongoose.Schema.Types.ObjectId],
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Packages", PackageSchema);
