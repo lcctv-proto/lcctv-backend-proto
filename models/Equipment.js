@@ -5,6 +5,7 @@ const EquipmentSchema = mongoose.Schema({
     label: String,
     description: String,
     price: Number,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Equipments", EquipmentSchema);

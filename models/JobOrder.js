@@ -10,6 +10,7 @@ const JobOrderSchema = mongoose.Schema({
     inquiryID: mongoose.Schema.Types.ObjectId,
     accountID: mongoose.Schema.Types.ObjectId,
     teamID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("JobOrders", JobOrderSchema);

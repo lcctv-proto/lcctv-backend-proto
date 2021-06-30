@@ -11,6 +11,7 @@ const PaymentSchema = mongoose.Schema({
     remarks: String,
     feeID: [mongoose.Schema.Types.ObjectId],
     accountID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Payments", PaymentSchema);

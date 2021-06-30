@@ -5,6 +5,7 @@ const TeamSchema = mongoose.Schema({
     description: String,
     installations: Number,
     areaID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Teams", TeamSchema);

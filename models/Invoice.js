@@ -5,6 +5,7 @@ const InvoiceSchema = mongoose.Schema({
     date: Date,
     amountDue: Number,
     accountID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Invoices", InvoiceSchema);

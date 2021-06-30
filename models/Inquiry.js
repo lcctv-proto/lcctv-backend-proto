@@ -8,6 +8,7 @@ const InquirySchema = mongoose.Schema({
     type: String,
     description: String,
     accountID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Inquiries", InquirySchema);

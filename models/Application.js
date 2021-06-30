@@ -7,6 +7,7 @@ const ApplicationSchema = mongoose.Schema({
     step: Number,
     remarks: String,
     accountID: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Applications", ApplicationSchema);

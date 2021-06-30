@@ -13,6 +13,7 @@ const PersonnelSchema = mongoose.Schema({
     username: String,
     password: String,
     role: mongoose.Schema.Types.ObjectId,
+    isDeleted: Boolean,
 });
 
 module.exports = mongoose.model("Personnel", PersonnelSchema);
