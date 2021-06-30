@@ -8,6 +8,7 @@ const ChannelSchema = mongoose.Schema({
     bannerImageURL: String,
     videoURL: String,
     channelImages: [String],
+    packages: [mongoose.Schema.Types.ObjectId],
     isDeleted: Boolean,
 });
 

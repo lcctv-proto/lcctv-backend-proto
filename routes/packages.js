@@ -3,16 +3,7 @@ const Package = require("../models/Package");
 
 router.get("/", async (req, res) => {
     try {
-        const packages = await Package.aggregate([
-            {
-                $lookup: {
-                    from: "channels",
-                    localField: "channels",
-                    foreignField: "_id",
-                    as: "channelsData",
-                },
-            },
-        ]);
+        const packages = await Package.find();
         res.status(200).json(packages.filter((package) => !package.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -42,7 +33,6 @@ router.post("/", async (req, res) => {
         name: name,
         description: description,
         price: price,
-        channels: [],
         isDeleted: false,
     });
 
@@ -55,9 +45,9 @@ router.post("/", async (req, res) => {
         });
     }
 });
-//60db80f7845c413e64f383ae
-router.patch("/:id", async (req, res) => {
-    const { channels } = req.body;
+
+router.put("/:id", async (req, res) => {
+    const { name, description, price } = req.body;
 
     try {
         const package = await Package.findById(req.params.id);
@@ -66,10 +56,15 @@ router.patch("/:id", async (req, res) => {
             res.status(404).json({ message: "Package not found" });
 
         const updatedPackage = await Package.findByIdAndUpdate(req.params.id, {
-            $set: { channels: channels },
+            $set: { name: name, description: description, price: price },
         });
 
-        updatedPackage.channels = channels;
+        updatedPackage = {
+            name: name,
+            description: description,
+            price: price,
+            isDeleted: false,
+        };
         res.status(200).json(updatedPackage);
     } catch (err) {
         res.status(400).json({
