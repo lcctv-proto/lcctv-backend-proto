@@ -41,42 +41,10 @@ router.post("/", async (req, res) => {
 
     const account = new Account({
         name: "ACC-00001",
-        accountName: {
-            firstName: accountName.firstName,
-            middleName: accountName.middleName,
-            lastName: accountName.lastName,
-        },
-        additionalInfo: {
-            birthdate: additionalInfo.birthdate,
-            nationality: additionalInfo.nationality,
-            gender: additionalInfo.gender,
-            civilStatus: additionalInfo.civilStatus,
-        },
-        serviceAddress: {
-            unit: serviceAddress.unit,
-            street: serviceAddress.street,
-            barangay: serviceAddress.barangay,
-            municipality: serviceAddress.municipality,
-            province: serviceAddress.province,
-            zipCode: serviceAddress.zipCode,
-            homeOwnership: serviceAddress.homeOwnership,
-            residencyYear: serviceAddress.residencyYear,
-        },
-        contactInfo: {
-            cellphoneNumber: contactInfo.cellphoneNumber,
-            telephoneNumber: contactInfo.telephoneNumber,
-            email: contactInfo.email,
-            motherMaidenName: {
-                firstName: contactInfo.motherMaidenName.firstName,
-                middleName: contactInfo.motherMaidenName.middleName,
-                lastName: contactInfo.motherMaidenName.lastName,
-            },
-            spouseName: {
-                firstName: contactInfo.spouseName.firstName,
-                middleName: contactInfo.spouseName.middleName,
-                lastName: contactInfo.spouseName.lastName,
-            },
-        },
+        accountName: accountName,
+        additionalInfo: additionalInfo,
+        serviceAddress: serviceAddress,
+        contactInfo: contactInfo,
         billingInfo: {
             accountCredit: 0,
             accountDebit: 0,
@@ -99,8 +67,94 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.patch("/:id", (req, res) => {
-    res.send(`EDIT ACCOUNT WITH ACCOUNT ID: ${req.params.id}`);
+router.put("/:id", async (req, res) => {
+    const { accountName, additionalInfo, contactInfo } = req.body;
+
+    try {
+        const account = await Account.findById(req.params.id);
+
+        if (account.isDeleted)
+            res.status(404).json({ message: "Account not found" });
+
+        const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
+            $set: {
+                accountName: accountName,
+                additionalInfo: additionalInfo,
+                contactInfo: contactInfo,
+            },
+        });
+        updatedAccount.accountName = accountName;
+        updatedAccount.additionalInfo = additionalInfo;
+        updatedAccount.contactInfo = contactInfo;
+        res.status(200).json(updatedAccount);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.patch("/package/:id", async (req, res) => {
+    const { packageID } = req.body;
+
+    try {
+        const account = await Account.findById(req.params.id);
+
+        if (account.isDeleted)
+            res.status(404).json({ message: "Account not found" });
+
+        const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
+            $set: { packageID: packageID },
+        });
+        updatedAccount.packageID = packageID;
+        res.status(200).json(updatedAccount);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.patch("/address/:id", async (req, res) => {
+    const { accountStatus } = req.body;
+
+    try {
+        const account = await Account.findById(req.params.id);
+
+        if (account.isDeleted)
+            res.status(404).json({ message: "Account not found" });
+
+        const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
+            $set: { accountStatus: accountStatus },
+        });
+        updatedAccount.accountStatus = accountStatus;
+        res.status(200).json(updatedAccount);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.patch("/status/:id", async (req, res) => {
+    const { serviceAddress } = req.body;
+
+    try {
+        const account = await Account.findById(req.params.id);
+
+        if (account.isDeleted)
+            res.status(404).json({ message: "Account not found" });
+
+        const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
+            $set: { serviceAddress: serviceAddress },
+        });
+        updatedAccount.serviceAddress = serviceAddress;
+        res.status(200).json(updatedAccount);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
 });
 
 router.delete("/:id", async (req, res) => {
