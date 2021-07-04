@@ -1,10 +1,17 @@
+//imported packages
 const express = require("express");
 const app = express();
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+//user defines routes
 const accounts = require("./routes/accounts");
 const packages = require("./routes/packages");
 const channels = require("./routes/channels");
-const mongoose = require("mongoose");
-require("dotenv").config();
+const fees = require("./routes/fees");
+const areas = require("./routes/areas");
+const roles = require("./routes/roles");
+const equipments = require("./routes/equipments");
 
 const port = process.env.PORT || 3000;
 
@@ -27,6 +34,10 @@ mongoose.connect(
 app.use("/api/accounts", accounts);
 app.use("/api/packages", packages);
 app.use("/api/channels", channels);
+app.use("/api/fees", fees);
+app.use("/api/areas", areas);
+app.use("/api/roles", roles);
+app.use("/api/equipments", equipments);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
