@@ -59,12 +59,10 @@ router.put("/:id", async (req, res) => {
             $set: { name: name, description: description, price: price },
         });
 
-        updatedPackage = {
-            name: name,
-            description: description,
-            price: price,
-            isDeleted: false,
-        };
+        updatedPackage.name = name;
+        updatedPackage.description = description;
+        updatedPackage.price = price;
+
         res.status(200).json(updatedPackage);
     } catch (err) {
         res.status(400).json({
