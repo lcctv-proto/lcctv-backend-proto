@@ -105,4 +105,17 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+router.delete("/hard/:id", async (req, res) => {
+    try {
+        const deletedEquipment = await Equipment.findByIdAndDelete(
+            req.params.id
+        );
+        res.status(200).json(deletedEquipment);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 module.exports = router;

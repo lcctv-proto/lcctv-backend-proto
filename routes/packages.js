@@ -4,7 +4,7 @@ const Package = require("../models/Package");
 router.get("/", async (req, res) => {
     try {
         const packages = await Package.find();
-        res.status(200).json(packages.filter((package) => !package.isDeleted));
+        res.status(200).json(packages.filter((pack) => !pack.isDeleted));
     } catch (err) {
         res.status(400).json({
             message: err,
@@ -14,10 +14,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const package = await Package.findById(req.params.id);
+        const pack = await Package.findById(req.params.id);
 
-        !package.isDeleted
-            ? res.status(200).json(package)
+        !pack.isDeleted
+            ? res.status(200).json(pack)
             : res.status(404).json({ message: "Package not found" });
     } catch (err) {
         res.status(400).json({
@@ -29,7 +29,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { name, description, price } = req.body;
 
-    const package = new Package({
+    const pack = new Package({
         name: name,
         description: description,
         price: price,
@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
     });
 
     try {
-        const savedPackage = await package.save();
+        const savedPackage = await pack.save();
         res.status(201).json(savedPackage);
     } catch (err) {
         res.status(400).json({
@@ -50,9 +50,9 @@ router.put("/:id", async (req, res) => {
     const { name, description, price } = req.body;
 
     try {
-        const package = await Package.findById(req.params.id);
+        const pack = await Package.findById(req.params.id);
 
-        if (package.isDeleted)
+        if (pack.isDeleted)
             res.status(404).json({ message: "Package not found" });
 
         const updatedPackage = await Package.findByIdAndUpdate(req.params.id, {
@@ -73,15 +73,26 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
     try {
-        const package = await Package.findById(req.params.id);
+        const pack = await Package.findById(req.params.id);
 
-        if (package.isDeleted)
+        if (pack.isDeleted)
             res.status(404).json({ message: "Package not found" });
 
         const deletedPackage = await Package.findByIdAndUpdate(req.params.id, {
             $set: { isDeleted: true },
         });
         deletedPackage.isDeleted = true;
+        res.status(200).json(deletedPackage);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.delete("/hard/:id", async (req, res) => {
+    try {
+        const deletedPackage = await Package.findByIdAndDelete(req.params.id);
         res.status(200).json(deletedPackage);
     } catch (err) {
         res.status(400).json({
