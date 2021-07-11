@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const InquirySchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     date: Date,
     contactNumber: String,
     email: String,
@@ -11,4 +12,5 @@ const InquirySchema = mongoose.Schema({
     isDeleted: Boolean,
 });
 
+InquirySchema.plugin(AutoIncrement, { inc_field: "inq_ctr" });
 module.exports = mongoose.model("Inquiries", InquirySchema);

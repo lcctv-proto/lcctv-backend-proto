@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const JobOrderSchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     description: String,
     status: String,
     type: String,
@@ -13,4 +14,5 @@ const JobOrderSchema = mongoose.Schema({
     isDeleted: Boolean,
 });
 
+JobOrderSchema.plugin(AutoIncrement, { inc_field: "jo_ctr" });
 module.exports = mongoose.model("JobOrders", JobOrderSchema);

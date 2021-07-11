@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const ApplicationSchema = mongoose.Schema({
-    referenceNumber: String,
+    prefix: String,
     date: Date,
     status: String,
     step: Number,
@@ -9,5 +10,7 @@ const ApplicationSchema = mongoose.Schema({
     accountID: mongoose.Schema.Types.ObjectId,
     isDeleted: Boolean,
 });
+
+ApplicationSchema.plugin(AutoIncrement, { inc_field: "ref_ctr" });
 
 module.exports = mongoose.model("Applications", ApplicationSchema);

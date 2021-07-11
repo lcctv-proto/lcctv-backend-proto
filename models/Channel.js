@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const ChannelSchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     description: String,
     assignedNumber: String,
     label: String,
@@ -11,5 +12,7 @@ const ChannelSchema = mongoose.Schema({
     packages: [mongoose.Schema.Types.ObjectId],
     isDeleted: Boolean,
 });
+
+ChannelSchema.plugin(AutoIncrement, { inc_field: "cha_ctr" });
 
 module.exports = mongoose.model("Channels", ChannelSchema);

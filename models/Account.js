@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const NameSchema = mongoose.Schema({
     _id: false,
@@ -45,7 +46,7 @@ const BillingSchema = mongoose.Schema({
 });
 
 const AccountSchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     accountName: NameSchema,
     additionalInfo: AdditionalInfoSchema,
     serviceAddress: AddressSchema,
@@ -57,5 +58,7 @@ const AccountSchema = mongoose.Schema({
     billingImageURL: String,
     isDeleted: Boolean,
 });
+
+AccountSchema.plugin(AutoIncrement, { inc_field: "acc_ctr" });
 
 module.exports = mongoose.model("Accounts", AccountSchema);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const NameSchema = mongoose.Schema({
     _id: false,
@@ -8,7 +9,7 @@ const NameSchema = mongoose.Schema({
 });
 
 const PersonnelSchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     personnelName: NameSchema,
     username: String,
     password: String,
@@ -16,4 +17,5 @@ const PersonnelSchema = mongoose.Schema({
     isDeleted: Boolean,
 });
 
+PersonnelSchema.plugin(AutoIncrement, { inc_field: "emp_ctr" });
 module.exports = mongoose.model("Personnel", PersonnelSchema);

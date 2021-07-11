@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const PaymentSchema = mongoose.Schema({
-    name: String,
+    prefix: String,
     description: String,
     date: Date,
     amountPaid: Number,
@@ -13,5 +14,7 @@ const PaymentSchema = mongoose.Schema({
     accountID: mongoose.Schema.Types.ObjectId,
     isDeleted: Boolean,
 });
+
+PaymentSchema.plugin(AutoIncrement, { inc_field: "pay_ctr" });
 
 module.exports = mongoose.model("Payments", PaymentSchema);
