@@ -29,10 +29,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { name, description, label, price } = req.body;
+    const { description, label, price } = req.body;
 
     const equipment = new Equipment({
-        name: name,
+        prefix: "EQPMNT",
         label: label,
         description: description,
         price: price,
@@ -50,7 +50,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const { name, description, label, price } = req.body;
+    const { description, label, price } = req.body;
 
     try {
         const equipment = await Equipment.findById(req.params.id);
@@ -62,7 +62,6 @@ router.put("/:id", async (req, res) => {
             req.params.id,
             {
                 $set: {
-                    name: name,
                     description: description,
                     label: label,
                     price: price,
@@ -70,7 +69,6 @@ router.put("/:id", async (req, res) => {
             }
         );
 
-        updatedEquipment.name = name;
         updatedEquipment.description = description;
         updatedEquipment.label = label;
         updatedEquipment.price = price;

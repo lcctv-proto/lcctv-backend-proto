@@ -16,9 +16,10 @@ router.get("/:id", async (req, res) => {
     try {
         const channel = await Channel.findById(req.params.id);
 
-        !channel.isDeleted
-            ? res.status(200).json(channel)
-            : res.status(404).json({ message: "Channel not found" });
+        if (channel.isDeleted)
+            return res.status(404).json({ message: "Channel not found" });
+
+        res.status(200).json(channel);
     } catch (err) {
         res.status(400).json({
             message: "Error. Please contact your administrator.",
@@ -43,7 +44,6 @@ router.get("/packages/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
     const {
-        name,
         description,
         assignedNumber,
         label,
@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     const channel = new Channel({
-        name: name,
+        prefix: "CHA",
         description: description,
         assignedNumber: assignedNumber,
         label: label,
@@ -77,46 +77,38 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     const {
-        name,
         description,
         assignedNumber,
         label,
         bannerImageURL,
         videoURL,
         channelImages,
-        packages,
     } = req.body;
 
     try {
         const channel = await Channel.findById(req.params.id);
 
         if (channel.isDeleted)
-            res.status(404).json({ message: "Channel not found" });
+            return res.status(404).json({ message: "Channel not found" });
 
         const updatedChannel = await Channel.findByIdAndUpdate(req.params.id, {
             $set: {
-                name: name,
                 description: description,
                 assignedNumber: assignedNumber,
                 label: label,
                 bannerImageURL: bannerImageURL,
                 videoURL: videoURL,
                 channelImages: channelImages,
-                packages: packages,
             },
         });
 
-        updatedChannel = {
-            name: name,
-            description: description,
-            assignedNumber: assignedNumber,
-            label: label,
-            bannerImageURL: bannerImageURL,
-            videoURL: videoURL,
-            channelImages: channelImages,
-            packages: packages,
-            isDeleted: false,
-        };
+        updatedChannel.description = description;
+        updatedChannel.assignedNumber = assignedNumber;
+        updatedChannel.label = label;
+        updatedChannel.bannerImageURL = bannerImageURL;
+        updatedChannel.videoURL = videoURL;
+        updatedChannel.channelImages = channelImages;
+        updatedChannel.isDeleted = false;
         res.status(200).json(updatedChannel);
     } catch (err) {
         res.status(400).json({
@@ -131,7 +123,7 @@ router.patch("/:id", async (req, res) => {
         const channel = await Channel.findById(req.params.id);
 
         if (channel.isDeleted)
-            res.status(404).json({ message: "Channel not found" });
+            return res.status(404).json({ message: "Channel not found" });
 
         const updatedChannel = await Channel.findByIdAndUpdate(req.params.id, {
             $set: { packages: packages },
@@ -150,12 +142,23 @@ router.delete("/:id", async (req, res) => {
         const channel = await Channel.findById(req.params.id);
 
         if (channel.isDeleted)
-            res.status(404).json({ message: "Channel not found" });
+            return res.status(404).json({ message: "Channel not found" });
 
         const deletedChannel = await Channel.findByIdAndUpdate(req.params.id, {
             $set: { isDeleted: true },
         });
         deletedChannel.isDeleted = true;
+        res.status(200).json(deletedChannel);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.delete("/hard/:id", async (req, res) => {
+    try {
+        const deletedChannel = await Channel.findByIdAndDelete(req.params.id);
         res.status(200).json(deletedChannel);
     } catch (err) {
         res.status(400).json({

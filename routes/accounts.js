@@ -32,15 +32,21 @@ router.post("/", async (req, res) => {
         additionalInfo,
         serviceAddress,
         contactInfo,
-        billingInfo,
+        startDate,
         packageID,
-        accountStatus,
         governmentIdImageURL,
         billingImageURL,
     } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `${yyyy}${mm}${dd}`;
+
     const account = new Account({
-        name: "ACC-00001",
+        prefix: prefix,
         accountName: accountName,
         additionalInfo: additionalInfo,
         serviceAddress: serviceAddress,
@@ -48,10 +54,10 @@ router.post("/", async (req, res) => {
         billingInfo: {
             accountCredit: 0,
             accountDebit: 0,
-            startDate: billingInfo.startDate,
+            startDate: startDate,
         },
         packageID: packageID,
-        accountStatus: accountStatus,
+        accountStatus: "PENDING",
         governmentIdImageURL: governmentIdImageURL,
         billingImageURL: billingImageURL,
         isDeleted: false,
@@ -86,6 +92,7 @@ router.put("/:id", async (req, res) => {
         updatedAccount.accountName = accountName;
         updatedAccount.additionalInfo = additionalInfo;
         updatedAccount.contactInfo = contactInfo;
+
         res.status(200).json(updatedAccount);
     } catch (err) {
         res.status(400).json({
@@ -106,6 +113,7 @@ router.patch("/package/:id", async (req, res) => {
         const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
             $set: { packageID: packageID },
         });
+
         updatedAccount.packageID = packageID;
         res.status(200).json(updatedAccount);
     } catch (err) {
@@ -115,7 +123,7 @@ router.patch("/package/:id", async (req, res) => {
     }
 });
 
-router.patch("/address/:id", async (req, res) => {
+router.patch("/status/:id", async (req, res) => {
     const { accountStatus } = req.body;
 
     try {
@@ -136,7 +144,7 @@ router.patch("/address/:id", async (req, res) => {
     }
 });
 
-router.patch("/status/:id", async (req, res) => {
+router.patch("/address/:id", async (req, res) => {
     const { serviceAddress } = req.body;
 
     try {
@@ -148,6 +156,7 @@ router.patch("/status/:id", async (req, res) => {
         const updatedAccount = await Account.findByIdAndUpdate(req.params.id, {
             $set: { serviceAddress: serviceAddress },
         });
+
         updatedAccount.serviceAddress = serviceAddress;
         res.status(200).json(updatedAccount);
     } catch (err) {
@@ -168,6 +177,17 @@ router.delete("/:id", async (req, res) => {
             $set: { isDeleted: true },
         });
         deletedAccount.isDeleted = true;
+        res.status(200).json(deletedAccount);
+    } catch (err) {
+        res.status(400).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.delete("/hard/:id", async (req, res) => {
+    try {
+        const deletedAccount = await Account.findByIdAndDelete(req.params.id);
         res.status(200).json(deletedAccount);
     } catch (err) {
         res.status(400).json({

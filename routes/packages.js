@@ -27,10 +27,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { name, description, price } = req.body;
+    const { description, price } = req.body;
 
     const pack = new Package({
-        name: name,
+        prefix: "PKG",
         description: description,
         price: price,
         isDeleted: false,
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const { name, description, price } = req.body;
+    const { description, price } = req.body;
 
     try {
         const pack = await Package.findById(req.params.id);
@@ -56,10 +56,9 @@ router.put("/:id", async (req, res) => {
             res.status(404).json({ message: "Package not found" });
 
         const updatedPackage = await Package.findByIdAndUpdate(req.params.id, {
-            $set: { name: name, description: description, price: price },
+            $set: { description: description, price: price },
         });
 
-        updatedPackage.name = name;
         updatedPackage.description = description;
         updatedPackage.price = price;
 

@@ -27,10 +27,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { name, description, price } = req.body;
+    const { description, price } = req.body;
 
     const fee = new Fee({
-        name: name,
+        prefix: "FEE",
         description: description,
         price: price,
         isDeleted: false,
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const { name, description, price } = req.body;
+    const { description, price } = req.body;
 
     try {
         const fee = await Fee.findById(req.params.id);
@@ -55,10 +55,9 @@ router.put("/:id", async (req, res) => {
         if (fee.isDeleted) res.status(404).json({ message: "Fee not found" });
 
         const updatedFee = await Fee.findByIdAndUpdate(req.params.id, {
-            $set: { name: name, description: description, price: price },
+            $set: { description: description, price: price },
         });
 
-        updatedFee.name = name;
         updatedFee.description = description;
         updatedFee.price = price;
 

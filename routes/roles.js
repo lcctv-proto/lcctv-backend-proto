@@ -27,10 +27,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { name, description } = req.body;
+    const { description } = req.body;
 
     const role = new Role({
-        name: name,
+        prefix: "ROLE",
         description: description,
         isDeleted: false,
     });
@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const { name, description } = req.body;
+    const { description } = req.body;
 
     try {
         const role = await Role.findById(req.params.id);
@@ -54,10 +54,9 @@ router.put("/:id", async (req, res) => {
         if (role.isDeleted) res.status(404).json({ message: "Role not found" });
 
         const updatedRole = await Role.findByIdAndUpdate(req.params.id, {
-            $set: { name: name, description: description },
+            $set: { description: description },
         });
 
-        updatedRole.name = name;
         updatedRole.description = description;
 
         res.status(200).json(updatedRole);

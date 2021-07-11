@@ -27,10 +27,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { name, description, imageURL } = req.body;
+    const { description, imageURL } = req.body;
 
     const area = new Area({
-        name: name,
+        prefix: "AREA",
         description: description,
         imageURL: imageURL,
         isDeleted: false,
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const { name, description, imageURL } = req.body;
+    const { description, imageURL } = req.body;
 
     try {
         const area = await Area.findById(req.params.id);
@@ -55,10 +55,9 @@ router.put("/:id", async (req, res) => {
         if (area.isDeleted) res.status(404).json({ message: "Area not found" });
 
         const updatedArea = await Area.findByIdAndUpdate(req.params.id, {
-            $set: { name: name, description: description, imageURL: imageURL },
+            $set: { description: description, imageURL: imageURL },
         });
 
-        updatedArea.name = name;
         updatedArea.description = description;
         updatedArea.imageURL = imageURL;
 
