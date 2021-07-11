@@ -5,7 +5,6 @@ request = request(`http://localhost:${process.env.PORT}`);
 describe("TEST CRUD for /api/equipments", () => {
     let data = {
         created_id: "",
-        name: "EQPMNT-001",
         label: "CABLE TIES",
         description: "BLACK CABLE TIES",
         price: 150,
@@ -20,7 +19,6 @@ describe("TEST CRUD for /api/equipments", () => {
         data.created_id = response.body._id;
 
         expect(response.statusCode).toBe(201);
-        expect(response.body.name).toBe(data.name);
         expect(response.body.label).toBe(data.label);
         expect(response.body.description).toBe(data.description);
         expect(response.body.price).toBe(data.price);
@@ -31,13 +29,11 @@ describe("TEST CRUD for /api/equipments", () => {
             `/api/equipments/${data.created_id}`
         );
         expect(response.statusCode).toBe(200);
-        expect(response.body.name).toBe(data.name);
         expect(response.body.label).toBe(data.label);
         expect(response.body.description).toBe(data.description);
         expect(response.body.price).toBe(data.price);
     });
 
-    data.name = "EQPMNT-002";
     data.label = "CABLE TIE";
     data.description = "GREEN CABLE TIE";
     data.price = 200;
@@ -49,7 +45,6 @@ describe("TEST CRUD for /api/equipments", () => {
             .set("Accept", "application/json");
 
         expect(response.statusCode).toBe(200);
-        expect(response.body.name).toBe(data.name);
         expect(response.body.label).toBe(data.label);
         expect(response.body.description).toBe(data.description);
         expect(response.body.price).toBe(data.price);
@@ -60,7 +55,6 @@ describe("TEST CRUD for /api/equipments", () => {
             `/api/equipments/hard/${data.created_id}`
         );
         expect(response.statusCode).toBe(200);
-        expect(response.body.name).toBe(data.name);
         expect(response.body.label).toBe(data.label);
         expect(response.body.description).toBe(data.description);
         expect(response.body.price).toBe(data.price);
