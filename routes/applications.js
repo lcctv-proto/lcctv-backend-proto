@@ -33,6 +33,7 @@ router.post("/", async (req, res) => {
 
     const application = new Application({
         prefix: "REF",
+        // date: Date.now(),
         date: "2000-02-17T00:00:00.000Z",
         status: "PENDING PAYMENT",
         step: 1,
