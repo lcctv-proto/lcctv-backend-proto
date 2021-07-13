@@ -6,6 +6,7 @@ const TeamSchema = mongoose.Schema({
     description: String,
     installations: Number,
     areaID: mongoose.Schema.Types.ObjectId,
+    personnelIDs: [mongoose.Schema.Types.ObjectId],
     isDeleted: Boolean,
 });
 

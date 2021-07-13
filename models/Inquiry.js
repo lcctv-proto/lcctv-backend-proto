@@ -3,6 +3,7 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const InquirySchema = mongoose.Schema({
     prefix: String,
+    status: String,
     date: Date,
     contactNumber: String,
     email: String,

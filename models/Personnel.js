@@ -13,7 +13,7 @@ const PersonnelSchema = mongoose.Schema({
     personnelName: NameSchema,
     username: String,
     password: String,
-    role: mongoose.Schema.Types.ObjectId,
+    roleID: mongoose.Schema.Types.ObjectId,
     isDeleted: Boolean,
 });
 

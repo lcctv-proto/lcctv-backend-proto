@@ -10,7 +10,7 @@ const PaymentSchema = mongoose.Schema({
     referenceNumber: String,
     modeOfPayment: String,
     remarks: String,
-    feeID: [mongoose.Schema.Types.ObjectId],
+    feeIDs: [mongoose.Schema.Types.ObjectId],
     accountID: mongoose.Schema.Types.ObjectId,
     isDeleted: Boolean,
 });

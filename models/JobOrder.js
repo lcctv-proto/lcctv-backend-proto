@@ -7,7 +7,7 @@ const JobOrderSchema = mongoose.Schema({
     status: String,
     type: String,
     remarks: String,
-    equipmentsUsed: [mongoose.Schema.Types.ObjectId],
+    equipmentsIDs: [mongoose.Schema.Types.ObjectId],
     inquiryID: mongoose.Schema.Types.ObjectId,
     accountID: mongoose.Schema.Types.ObjectId,
     teamID: mongoose.Schema.Types.ObjectId,
