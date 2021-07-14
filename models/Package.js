@@ -8,4 +8,5 @@ const PackageSchema = mongoose.Schema({
 });
 
 PackageSchema.plugin(AutoIncrement, { inc_field: "pkg_ctr" });
+
 module.exports = mongoose.model("Packages", PackageSchema);

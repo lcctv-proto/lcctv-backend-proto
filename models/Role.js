@@ -8,4 +8,5 @@ const RoleSchema = mongoose.Schema({
 });
 
 RoleSchema.plugin(AutoIncrement, { inc_field: "role_ctr" });
+
 module.exports = mongoose.model("Roles", RoleSchema);

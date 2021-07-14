@@ -10,4 +10,5 @@ const InvoiceSchema = mongoose.Schema({
 });
 
 InvoiceSchema.plugin(AutoIncrement, { inc_field: "inv_ctr" });
+
 module.exports = mongoose.model("Invoices", InvoiceSchema);

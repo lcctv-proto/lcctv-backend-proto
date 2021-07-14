@@ -18,4 +18,5 @@ const PersonnelSchema = mongoose.Schema({
 });
 
 PersonnelSchema.plugin(AutoIncrement, { inc_field: "emp_ctr" });
+
 module.exports = mongoose.model("Personnel", PersonnelSchema);

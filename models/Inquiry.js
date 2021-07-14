@@ -14,4 +14,5 @@ const InquirySchema = mongoose.Schema({
 });
 
 InquirySchema.plugin(AutoIncrement, { inc_field: "inq_ctr" });
+
 module.exports = mongoose.model("Inquiries", InquirySchema);

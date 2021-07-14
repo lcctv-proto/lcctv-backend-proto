@@ -11,4 +11,5 @@ const TeamSchema = mongoose.Schema({
 });
 
 TeamSchema.plugin(AutoIncrement, { inc_field: "team_ctr" });
+
 module.exports = mongoose.model("Teams", TeamSchema);

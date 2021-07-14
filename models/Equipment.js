@@ -8,6 +8,7 @@ const EquipmentSchema = mongoose.Schema({
     price: Number,
     isDeleted: Boolean,
 });
+
 EquipmentSchema.plugin(AutoIncrement, { inc_field: "eqpmnt_ctr" });
 
 module.exports = mongoose.model("Equipments", EquipmentSchema);
