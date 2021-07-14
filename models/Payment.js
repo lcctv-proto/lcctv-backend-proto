@@ -3,14 +3,17 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const PaymentSchema = mongoose.Schema({
     prefix: String,
-    description: String,
     date: Date,
-    amountPaid: Number,
-    dateIssued: Date,
-    referenceNumber: String,
-    modeOfPayment: String,
-    remarks: String,
     feeIDs: [mongoose.Schema.Types.ObjectId],
+    amountPaid: Number,
+    dateIssued: Date, // For Check, GCash, PayMaya, ShopeePay, BayadCenter, dragonPay
+    receiptNumber: String, // For Cash, Check,
+    referenceNumber: String, // For GCash, PayMaya, ShopeePay, BayadCenter, dragonPay,
+    modeOfPayment: String, // Can be Cash, Check, GCash, PayMaya, ShopeePay, BayadCenter, dragonPay
+    issuingBank: String, // For Check
+    checkNumber: String, // For Check
+    checkAmount: Number, // For Check
+    remarks: String,
     accountID: mongoose.Schema.Types.ObjectId,
     isDeleted: Boolean,
 });
