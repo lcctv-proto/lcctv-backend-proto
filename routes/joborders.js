@@ -29,7 +29,22 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const jo = await JobOrder.findById(req.params.id);
+        const jo = await JobOrder.findById(req.params.id)
+            .populate("accountID", "_id accountName")
+            .populate({
+                path: "teamID",
+                populate: { path: "personnelIDs", select: "personnelName" },
+                select: "personnelIDs description",
+            })
+            .populate("applicationID", "date status")
+            .populate(
+                "inquiryID",
+                "-_id -prefix -date -isDeleted -inq_ctr -__v -accountID"
+            )
+            .populate({
+                path: "equipmentsUsed",
+                populate: { path: "equipmentID", select: "description price" },
+            });
 
         if (jo.isDeleted)
             return res.status(404).json({ message: "Job Order not found" });
