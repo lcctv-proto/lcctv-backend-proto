@@ -57,6 +57,10 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
+app.post("/", (req, res) => {
+    res.status(200).send("Success");
+});
+
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
