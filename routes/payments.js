@@ -16,7 +16,9 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const payment = await Payment.findById(req.params.id);
+        const payment = await Payment.findById(req.params.id)
+            .populate("accountID", "_id accountName")
+            .populate("feeIDs", "name description price -_id");
 
         if (payment.isDeleted)
             return res.status(404).json({ message: "Payment not found" });

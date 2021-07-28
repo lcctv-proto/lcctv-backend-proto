@@ -16,7 +16,9 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const team = await Team.findById(req.params.id);
+        const team = await Team.findById(req.params.id)
+            .populate("areaID", "-_id description imageURL")
+            .populate("personnelIDs", "personnelName");
 
         if (team.isDeleted)
             return res.status(404).json({ message: "Team not found" });

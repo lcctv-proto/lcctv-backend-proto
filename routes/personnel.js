@@ -19,7 +19,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const personnel = await Personnel.findById(req.params.id);
+        const personnel = await Personnel.findById(req.params.id).populate(
+            "roleID",
+            "description"
+        );
 
         if (personnel.isDeleted)
             return res.status(404).json({ message: "Personnel not found" });
