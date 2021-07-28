@@ -3,7 +3,10 @@ const Channel = require("../models/Channel");
 
 router.get("/", async (req, res) => {
     try {
-        const channels = await Channel.find();
+        const channels = await Channel.find().populate(
+            "packages",
+            "-isDeleted -pkg_ctr -__v"
+        );
         res.status(200).json(channels.filter((channel) => !channel.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -14,7 +17,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const channel = await Channel.findById(req.params.id);
+        const channel = await Channel.findById(req.params.id).populate(
+            "packages",
+            "-isDeleted -pkg_ctr -__v"
+        );
 
         if (channel.isDeleted)
             return res.status(404).json({ message: "Channel not found" });

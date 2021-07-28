@@ -3,7 +3,22 @@ const JobOrder = require("../models/JobOrder");
 
 router.get("/", async (req, res) => {
     try {
-        const jos = await JobOrder.find();
+        const jos = await JobOrder.find()
+            .populate("accountID", "_id accountName")
+            .populate({
+                path: "teamID",
+                populate: { path: "personnelIDs", select: "personnelName" },
+                select: "personnelIDs description",
+            })
+            .populate("applicationID", "date status")
+            .populate(
+                "inquiryID",
+                "-_id -prefix -date -isDeleted -inq_ctr -__v -accountID"
+            )
+            .populate({
+                path: "equipmentsUsed",
+                populate: { path: "equipmentID", select: "description price" },
+            });
         res.status(200).json(jos.filter((jo) => !jo.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -31,7 +46,7 @@ router.post("/installation/", async (req, res) => {
     const { type, remarks, applicationID, accountID } = req.body;
 
     const jo = new JobOrder({
-        prefix: "PAY",
+        prefix: "JO",
         date: Date.now(),
         status: "PENDING",
         type: type,
@@ -55,7 +70,7 @@ router.post("/maintenance/", async (req, res) => {
     const { type, remarks, inquiryID, accountID } = req.body;
 
     const jo = new JobOrder({
-        prefix: "PAY",
+        prefix: "JO",
         date: Date.now(),
         status: "PENDING",
         type: type,
@@ -100,6 +115,7 @@ router.patch("/:id", async (req, res) => {
         updatedJobOrder.status = status;
         updatedJobOrder.branch = branch;
         updatedJobOrder.teamID = teamID;
+
         res.status(200).json(updatedJobOrder);
     } catch (err) {
         res.status(400).json({

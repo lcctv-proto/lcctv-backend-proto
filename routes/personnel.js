@@ -3,7 +3,10 @@ const Personnel = require("../models/Personnel");
 
 router.get("/", async (req, res) => {
     try {
-        const personnel_list = await Personnel.find();
+        const personnel_list = await Personnel.find().populate(
+            "roleID",
+            "description"
+        );
         res.status(200).json(
             personnel_list.filter((personnel) => !personnel.isDeleted)
         );

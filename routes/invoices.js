@@ -3,7 +3,10 @@ const Invoice = require("../models/Invoice");
 
 router.get("/", async (req, res) => {
     try {
-        const invoices = await Invoice.find();
+        const invoices = await Invoice.find().populate(
+            "accountID",
+            "_id accountName"
+        );
         res.status(200).json(invoices.filter((invoice) => !invoice.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -14,7 +17,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const invoice = await Invoice.findById(req.params.id);
+        const invoice = await Invoice.findById(req.params.id).populate(
+            "accountID",
+            "_id accountName"
+        );
 
         if (invoice.isDeleted)
             return res.status(404).json({ message: "Invoice not found" });

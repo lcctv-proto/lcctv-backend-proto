@@ -3,7 +3,10 @@ const Application = require("../models/Application");
 
 router.get("/", async (req, res) => {
     try {
-        const applications = await Application.find();
+        const applications = await Application.find().populate(
+            "accountID",
+            "_id accountName"
+        );
         res.status(200).json(
             applications.filter((application) => !application.isDeleted)
         );
@@ -16,7 +19,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const application = await Application.findById(req.params.id);
+        const application = await Application.findById(req.params.id).populate(
+            "accountID",
+            "_id accountName"
+        );
 
         !application.isDeleted
             ? res.status(200).json(application)
@@ -33,8 +39,8 @@ router.post("/", async (req, res) => {
 
     const application = new Application({
         prefix: "REF",
-        // date: Date.now(),
-        date: "2000-02-17T00:00:00.000Z",
+        date: Date.now(),
+        // date: "2000-02-17T00:00:00.000Z",
         status: "PENDING PAYMENT",
         step: 1,
         remarks: remarks,

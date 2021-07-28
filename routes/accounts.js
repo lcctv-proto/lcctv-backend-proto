@@ -3,7 +3,10 @@ const Account = require("../models/Account");
 
 router.get("/", async (req, res) => {
     try {
-        const accounts = await Account.find();
+        const accounts = await Account.find().populate(
+            "packageID",
+            "-isDeleted -pkg_ctr -__v"
+        );
         res.status(200).json(accounts.filter((acc) => !acc.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -14,7 +17,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const account = await Account.findById(req.params.id);
+        const account = await Account.findById(req.params.id).populate(
+            "packageID",
+            "-isDeleted -pkg_ctr -__v"
+        );
 
         !account.isDeleted
             ? res.status(200).json(account)
@@ -89,6 +95,7 @@ router.put("/:id", async (req, res) => {
                 contactInfo: contactInfo,
             },
         });
+
         updatedAccount.accountName = accountName;
         updatedAccount.additionalInfo = additionalInfo;
         updatedAccount.contactInfo = contactInfo;

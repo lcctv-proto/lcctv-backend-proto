@@ -3,7 +3,9 @@ const Payment = require("../models/Payment");
 
 router.get("/", async (req, res) => {
     try {
-        const payments = await Payment.find();
+        const payments = await Payment.find()
+            .populate("accountID", "_id accountName")
+            .populate("feeIDs", "name description price -_id");
         res.status(200).json(payments.filter((payment) => !payment.isDeleted));
     } catch (err) {
         res.status(400).json({

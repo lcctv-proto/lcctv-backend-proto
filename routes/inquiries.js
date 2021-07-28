@@ -3,7 +3,10 @@ const Inquiry = require("../models/Inquiry");
 
 router.get("/", async (req, res) => {
     try {
-        const inquiries = await Inquiry.find();
+        const inquiries = await Inquiry.find().populate(
+            "accountID",
+            "_id accountName"
+        );
         res.status(200).json(inquiries.filter((inquiry) => !inquiry.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -14,7 +17,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const inquiry = await Inquiry.findById(req.params.id);
+        const inquiry = await Inquiry.findById(req.params.id).populate(
+            "accountID",
+            "_id accountName"
+        );
 
         if (inquiry.isDeleted)
             return res.status(404).json({ message: "Inquiry not found" });

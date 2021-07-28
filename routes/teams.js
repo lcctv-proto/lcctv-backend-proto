@@ -3,7 +3,9 @@ const Team = require("../models/Team");
 
 router.get("/", async (req, res) => {
     try {
-        const teams = await Team.find();
+        const teams = await Team.find()
+            .populate("areaID", "-_id description imageURL")
+            .populate("personnelIDs", "personnelName");
         res.status(200).json(teams.filter((team) => !team.isDeleted));
     } catch (err) {
         res.status(400).json({
