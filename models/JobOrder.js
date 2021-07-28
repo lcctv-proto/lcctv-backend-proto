@@ -3,23 +3,48 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const EquipmentUsed = mongoose.Schema({
     _id: false,
-    equipmentID: mongoose.Schema.Types.ObjectId,
+    equipmentID: { type: mongoose.Schema.Types.ObjectId, ref: "Equipments" },
     quantity: Number,
 });
 
 const JobOrderSchema = mongoose.Schema({
-    prefix: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     date: Date,
     jobDate: Date,
-    branch: String,
-    status: String, // Can be "PENDING", "ONGOING", "CLOSED"
-    type: String, // Can be "INSTALLATION", "MAINTENANCE"
-    remarks: String,
+    branch: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    status: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        enum: ["PENDING", "ONGOING", "CLOSED"],
+    }, // Can be "PENDING", "ONGOING", "CLOSED"
+    type: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        enum: ["INSTALLATION", "MAINTENANCE"],
+    }, // Can be "INSTALLATION", "MAINTENANCE"
+    remarks: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     equipmentsUsed: [EquipmentUsed],
-    inquiryID: mongoose.Schema.Types.ObjectId, // For MAINTENANCE JOs only
-    applicationID: mongoose.Schema.Types.ObjectId, // For INSTALLATIONS JOs only
-    accountID: mongoose.Schema.Types.ObjectId,
-    teamID: mongoose.Schema.Types.ObjectId,
+    inquiryID: { type: mongoose.Schema.Types.ObjectId, ref: "Inquiries" }, // For MAINTENANCE JOs only
+    applicationID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Applications",
+    }, // For INSTALLATIONS JOs only
+    accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
+    teamID: { type: mongoose.Schema.Types.ObjectId, ref: "Teams" },
     isDeleted: Boolean,
 });
 

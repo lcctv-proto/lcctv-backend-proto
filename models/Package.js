@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const PackageSchema = mongoose.Schema({
-    description: String,
+    description: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     price: Number,
     isDeleted: Boolean,
 });

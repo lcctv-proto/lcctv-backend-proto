@@ -2,8 +2,16 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const FeeSchema = mongoose.Schema({
-    prefix: String,
-    description: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    description: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     price: Number,
     isDeleted: Boolean,
 });

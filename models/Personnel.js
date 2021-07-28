@@ -3,17 +3,33 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const NameSchema = mongoose.Schema({
     _id: false,
-    firstName: String,
-    middleName: String,
-    lastName: String,
+    firstName: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    middleName: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    lastName: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
 });
 
 const PersonnelSchema = mongoose.Schema({
-    prefix: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     personnelName: NameSchema,
     username: String,
     password: String,
-    roleID: mongoose.Schema.Types.ObjectId,
+    roleID: { type: mongoose.Schema.Types.ObjectId, ref: "Roles" },
     isDeleted: Boolean,
 });
 

@@ -2,9 +2,20 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const AreaSchema = mongoose.Schema({
-    prefix: String,
-    description: String,
-    imageURL: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    description: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    imageURL: {
+        type: String,
+        trim: true,
+    },
     isDeleted: Boolean,
 });
 

@@ -2,11 +2,19 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const TeamSchema = mongoose.Schema({
-    prefix: String,
-    description: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    description: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     installations: Number,
-    areaID: mongoose.Schema.Types.ObjectId,
-    personnelIDs: [mongoose.Schema.Types.ObjectId],
+    areaID: { type: mongoose.Schema.Types.ObjectId, ref: "Areas" },
+    personnelIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Personnel" }],
     isDeleted: Boolean,
 });
 

@@ -2,14 +2,39 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const InquirySchema = mongoose.Schema({
-    prefix: String,
-    status: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    status: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     date: Date,
-    contactNumber: String,
-    email: String,
-    type: String,
-    description: String,
-    accountID: mongoose.Schema.Types.ObjectId,
+    contactNumber: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    email: {
+        type: String,
+        lowercase: true,
+        trim: true,
+        match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    },
+    type: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    description: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
+    accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     isDeleted: Boolean,
 });
 

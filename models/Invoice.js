@@ -2,10 +2,14 @@ const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const InvoiceSchema = mongoose.Schema({
-    prefix: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     date: Date,
     amountDue: Number,
-    accountID: mongoose.Schema.Types.ObjectId,
+    accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     isDeleted: Boolean,
 });
 

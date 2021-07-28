@@ -7,7 +7,7 @@ const ApplicationSchema = mongoose.Schema({
     status: String,
     step: Number,
     remarks: String,
-    accountID: mongoose.Schema.Types.ObjectId,
+    accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     isDeleted: Boolean,
 });
 
