@@ -58,7 +58,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-    res.status(200).send("Success");
+    res.status(200).send("Success!");
 });
 
 app.listen(port, () => {
