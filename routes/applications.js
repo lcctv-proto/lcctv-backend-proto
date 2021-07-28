@@ -37,8 +37,15 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { remarks, accountID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `REF-${yyyy}${mm}${dd}`;
+
     const application = new Application({
-        prefix: "REF",
+        prefix: prefix,
         date: Date.now(),
         // date: "2000-02-17T00:00:00.000Z",
         status: "PENDING PAYMENT",

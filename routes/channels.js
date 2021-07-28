@@ -59,8 +59,15 @@ router.post("/", async (req, res) => {
         packages,
     } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `CHA-${yyyy}${mm}${dd}`;
+
     const channel = new Channel({
-        prefix: "CHA",
+        prefix: prefix,
         description: description,
         assignedNumber: assignedNumber,
         label: label,

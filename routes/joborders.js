@@ -60,8 +60,15 @@ router.get("/:id", async (req, res) => {
 router.post("/installation/", async (req, res) => {
     const { type, remarks, applicationID, accountID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `JO-${yyyy}${mm}${dd}`;
+
     const jo = new JobOrder({
-        prefix: "JO",
+        prefix: prefix,
         date: Date.now(),
         status: "PENDING",
         type: type,
@@ -84,8 +91,15 @@ router.post("/installation/", async (req, res) => {
 router.post("/maintenance/", async (req, res) => {
     const { type, remarks, inquiryID, accountID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `JO-${yyyy}${mm}${dd}`;
+
     const jo = new JobOrder({
-        prefix: "JO",
+        prefix: prefix,
         date: Date.now(),
         status: "PENDING",
         type: type,

@@ -36,10 +36,17 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { contactNumber, email, type, description, accountID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `INQ-${yyyy}${mm}${dd}`;
+
     const inquiry = new Inquiry({
-        prefix: "REF",
-        // date: Date.now(),
-        date: "2000-02-17T00:00:00.000Z",
+        prefix: prefix,
+        date: Date.now(),
+        // date: "2000-02-17T00:00:00.000Z",
         status: "PENDING", // "DENIED", "CLOSED(TO JO)", "CLOSED(GEN INQ)", "CLOSED(CASHIER)"
         contactNumber: contactNumber,
         email: email,

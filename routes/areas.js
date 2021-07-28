@@ -29,8 +29,15 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { description, imageURL } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `AREA-${yyyy}${mm}${dd}`;
+
     const area = new Area({
-        prefix: "AREA",
+        prefix: prefix,
         description: description,
         imageURL: imageURL,
         isDeleted: false,

@@ -38,11 +38,16 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { personnelName, roleID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `EMP-${yyyy}${mm}${dd}`;
+
     const personnel = new Personnel({
-        prefix: "EMP",
+        prefix: prefix,
         personnelName: personnelName,
-        username: "",
-        password: "",
         roleID: roleID,
         isDeleted: false,
     });

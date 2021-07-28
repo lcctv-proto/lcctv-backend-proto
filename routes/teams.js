@@ -34,8 +34,15 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { description, areaID } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `TEAM-${yyyy}${mm}${dd}`;
+
     const team = new Team({
-        prefix: "TEAM",
+        prefix: prefix,
         description: description,
         installations: 0,
         areaID: areaID,

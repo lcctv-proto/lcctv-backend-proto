@@ -46,8 +46,15 @@ router.post("/", async (req, res) => {
         remarks,
     } = req.body;
 
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+
+    const prefix = `PAY-${yyyy}${mm}${dd}`;
+
     const payment = new Payment({
-        prefix: "PAY",
+        prefix: prefix,
         date: Date.now(),
         feeIDs: feeIDs,
         amountPaid: amountPaid,
