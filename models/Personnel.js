@@ -27,8 +27,16 @@ const PersonnelSchema = mongoose.Schema({
         trim: true,
     },
     personnelName: NameSchema,
-    username: String,
-    password: String,
+    username: {
+        type: String,
+        trim: true,
+        select: false,
+    },
+    password: {
+        type: String,
+        trim: true,
+        select: false,
+    },
     roleID: { type: mongoose.Schema.Types.ObjectId, ref: "Roles" },
     isDeleted: Boolean,
 });

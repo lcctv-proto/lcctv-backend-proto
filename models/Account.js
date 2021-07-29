@@ -117,7 +117,11 @@ const BillingSchema = mongoose.Schema({
 });
 
 const AccountSchema = mongoose.Schema({
-    prefix: String,
+    prefix: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     accountName: NameSchema,
     additionalInfo: AdditionalInfoSchema,
     serviceAddress: AddressSchema,
