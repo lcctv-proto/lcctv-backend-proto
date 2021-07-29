@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "test": "jest --detectOpenHandles",
-        "start": "node index.js",
-        "dev-start": "nodemon index.js"
+        "start": "node --no-deprecation index.js",
+        "dev-start": "nodemon --no-deprecation index.js"
     },
     "repository": {
         "type": "git",
