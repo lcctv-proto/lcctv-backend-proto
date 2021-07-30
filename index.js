@@ -57,8 +57,19 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-app.post("/", (req, res) => {
-    res.status(200).send("Success!");
+app.post("/", async (req, res) => {
+    try {
+        await mongoose.connection.db
+            .dropCollection("counters")
+            .then(() => {
+                res.status(200).send("Success!");
+            })
+            .catch((err) => {
+                res.status(404).send("Collection not found!");
+            });
+    } catch (err) {
+        res.status(500).send("Error. Please contact your administrator");
+    }
 });
 
 app.listen(port, () => {
