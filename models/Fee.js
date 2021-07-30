@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const FeeSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "FEE-"),
     },
     description: {
         type: String,
@@ -13,7 +14,10 @@ const FeeSchema = mongoose.Schema({
         trim: true,
     },
     price: Number,
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 FeeSchema.plugin(AutoIncrement, { inc_field: "fee_ctr" });

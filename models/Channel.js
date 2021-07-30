@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const ChannelSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "CHA-"),
     },
     description: {
         type: String,
+        uppercase: true,
         trim: true,
     },
     assignedNumber: {
@@ -18,7 +20,6 @@ const ChannelSchema = mongoose.Schema({
     },
     label: {
         type: String,
-        uppercase: true,
         trim: true,
     },
     bannerImageURL: {
@@ -36,7 +37,7 @@ const ChannelSchema = mongoose.Schema({
         },
     ],
     packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Packages" }],
-    isDeleted: Boolean,
+    isDeleted: { type: Boolean, default: false },
 });
 
 ChannelSchema.plugin(AutoIncrement, { inc_field: "cha_ctr" });

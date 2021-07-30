@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const PaymentSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "PAY-"),
     },
     date: Date,
     feeIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fees" }],
@@ -49,7 +50,10 @@ const PaymentSchema = mongoose.Schema({
         trim: true,
     },
     accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 PaymentSchema.plugin(AutoIncrement, { inc_field: "pay_ctr" });

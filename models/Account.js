@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const NameSchema = mongoose.Schema({
     _id: false,
@@ -109,29 +110,26 @@ const ContactSchema = mongoose.Schema({
     spouseName: NameSchema,
 });
 
-const BillingSchema = mongoose.Schema({
-    _id: false,
-    accountCredit: Number,
-    accountDebit: Number,
-    startDate: Date,
-});
-
 const AccountSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yyyymmdd"),
     },
     accountName: NameSchema,
     additionalInfo: AdditionalInfoSchema,
     serviceAddress: AddressSchema,
     contactInfo: ContactSchema,
-    billingInfo: BillingSchema,
+    billingInfo: {
+        accountCredit: { type: Number, default: 0 },
+        accountDebit: { type: Number, default: 0 },
+        startDate: Date,
+    },
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "Packages" },
     accountStatus: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: "PENDING",
     },
     governmentIdImageURL: {
         type: String,
@@ -141,7 +139,10 @@ const AccountSchema = mongoose.Schema({
         type: String,
         trim: true,
     },
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 AccountSchema.plugin(AutoIncrement, { inc_field: "acc_ctr" });

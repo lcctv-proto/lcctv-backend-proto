@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const EquipmentUsed = mongoose.Schema({
     _id: false,
@@ -11,7 +12,7 @@ const JobOrderSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "JO-"),
     },
     date: Date,
     jobDate: Date,
@@ -45,7 +46,10 @@ const JobOrderSchema = mongoose.Schema({
     }, // For INSTALLATIONS JOs only
     accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     teamID: { type: mongoose.Schema.Types.ObjectId, ref: "Teams" },
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 JobOrderSchema.plugin(AutoIncrement, { inc_field: "jo_ctr" });

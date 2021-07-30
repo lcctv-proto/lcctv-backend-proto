@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const NameSchema = mongoose.Schema({
     _id: false,
@@ -24,7 +25,7 @@ const PersonnelSchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "EMP-"),
     },
     personnelName: NameSchema,
     username: {
@@ -38,7 +39,10 @@ const PersonnelSchema = mongoose.Schema({
         select: false,
     },
     roleID: { type: mongoose.Schema.Types.ObjectId, ref: "Roles" },
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 PersonnelSchema.plugin(AutoIncrement, { inc_field: "emp_ctr" });

@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const { getPrefix } = require("../utils/getPrefix");
 
 const InquirySchema = mongoose.Schema({
     prefix: {
         type: String,
         uppercase: true,
-        trim: true,
+        default: getPrefix("yymmdd", "INQ-"),
     },
     status: {
         type: String,
@@ -35,7 +36,10 @@ const InquirySchema = mongoose.Schema({
         trim: true,
     },
     accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 InquirySchema.plugin(AutoIncrement, { inc_field: "inq_ctr" });
