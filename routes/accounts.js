@@ -4,9 +4,9 @@ const Package = require("../models/Package");
 
 router.get("/", async (req, res) => {
     try {
-        const accounts = await Account.find({}, "-isDeleted -__v").populate(
+        const accounts = await Account.find({}, "-__v").populate(
             "packageID",
-            "-isDeleted -__v"
+            "-__v"
         );
 
         res.status(200).json(accounts.filter((account) => !account.isDeleted));
@@ -18,18 +18,17 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const type = req.query.type;
         if (type === "custom") {
-            // 202107290001
-            const id = req.params.id;
+            // 20210729 0001
             const prefix = id.toUpperCase().substring(0, 8);
             const acc_ctr = parseInt(id.toUpperCase().substring(8), 10);
-            await Account.findOne(
-                { prefix: prefix, acc_ctr: acc_ctr },
-                "-isDeleted -__v"
-            )
-                .populate("packageID", "-isDeleted -__v")
+
+            await Account.findOne({ prefix, acc_ctr }, " -__v")
+                .populate("packageID", "-__v")
                 .then((account) => {
                     if (account.isDeleted)
                         return res
@@ -42,13 +41,14 @@ router.get("/:id", async (req, res) => {
                     res.status(404).json({ message: "Account not found" })
                 );
         } else {
-            await Account.findById(req.params.id, "-isDeleted -__v")
-                .populate("packageID", "-isDeleted -__v")
+            await Account.findById(id, "-__v")
+                .populate("packageID", "-__v")
                 .then((account) => {
                     if (account.isDeleted)
                         return res
                             .status(404)
                             .json({ message: "Account not found" });
+
                     res.status(200).json(account);
                 })
                 .catch((err) =>
@@ -68,39 +68,23 @@ router.post("/", async (req, res) => {
         additionalInfo,
         serviceAddress,
         contactInfo,
-        startDate,
         packageID,
         governmentIdImageURL,
         billingImageURL,
     } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `${yyyy}${mm}${dd}`;
-
     const account = new Account({
-        prefix: prefix,
-        accountName: accountName,
-        additionalInfo: additionalInfo,
-        serviceAddress: serviceAddress,
-        contactInfo: contactInfo,
-        billingInfo: {
-            accountCredit: 0,
-            accountDebit: 0,
-            startDate: startDate,
-        },
-        packageID: packageID,
-        accountStatus: "PENDING",
-        governmentIdImageURL: governmentIdImageURL,
-        billingImageURL: billingImageURL,
-        isDeleted: false,
+        accountName,
+        additionalInfo,
+        serviceAddress,
+        contactInfo,
+        packageID,
+        governmentIdImageURL,
+        billingImageURL,
     });
 
     try {
-        await Package.findById(packageID, "-_id -isDeleted -__v")
+        await Package.findById(packageID)
             .then(async (pkg) => {
                 if (pkg.isDeleted)
                     return res
@@ -123,31 +107,30 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     const { accountName, additionalInfo, contactInfo } = req.body;
+    const { id } = req.params;
 
     try {
-        await Account.findById(req.params.id, "-isDeleted -__v")
+        await Account.findById(id)
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
 
-                const updatedAccount = await Account.findByIdAndUpdate(
-                    req.params.id,
-                    {
-                        $set: {
-                            accountName: accountName,
-                            additionalInfo: additionalInfo,
-                            contactInfo: contactInfo,
-                        },
-                    }
-                );
+                const updatedAccount = await Account.findByIdAndUpdate(id, {
+                    $set: {
+                        accountName,
+                        additionalInfo,
+                        contactInfo,
+                    },
+                });
 
-                updatedAccount.accountName = accountName;
-                updatedAccount.additionalInfo = additionalInfo;
-                updatedAccount.contactInfo = contactInfo;
-
-                res.status(200).json(updatedAccount);
+                res.status(200).json({
+                    ...updatedAccount._doc,
+                    accountName,
+                    additionalInfo,
+                    contactInfo,
+                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Account not found" })
@@ -161,16 +144,17 @@ router.put("/:id", async (req, res) => {
 
 router.patch("/package/:id", async (req, res) => {
     const { packageID } = req.body;
+    const { id } = req.params;
 
     try {
-        await Account.findById(req.params.id, "-isDeleted -__v")
+        await Account.findById(id)
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
 
-                await Package.findById(packageID, "-_id -isDeleted -__v")
+                await Package.findById(packageID)
                     .then(async (pkg) => {
                         if (pkg.isDeleted)
                             return res
@@ -178,14 +162,15 @@ router.patch("/package/:id", async (req, res) => {
                                 .json({ message: "Package not found" });
 
                         const updatedAccount = await Account.findByIdAndUpdate(
-                            req.params.id,
+                            id,
                             {
-                                $set: { packageID: packageID },
+                                $set: { packageID },
                             }
                         );
-
-                        updatedAccount.packageID = packageID;
-                        res.status(200).json(updatedAccount);
+                        res.status(200).json({
+                            ...updatedAccount._doc,
+                            packageID,
+                        });
                     })
                     .catch((err) => {
                         return res
@@ -205,23 +190,24 @@ router.patch("/package/:id", async (req, res) => {
 
 router.patch("/status/:id", async (req, res) => {
     const { accountStatus } = req.body;
+    const { id } = req.params;
 
     try {
-        await Account.findById(req.params.id, "-isDeleted -__v")
+        await Account.findById(id)
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
 
-                const updatedAccount = await Account.findByIdAndUpdate(
-                    req.params.id,
-                    {
-                        $set: { accountStatus: accountStatus },
-                    }
-                );
-                updatedAccount.accountStatus = accountStatus;
-                res.status(200).json(updatedAccount);
+                const updatedAccount = await Account.findByIdAndUpdate(id, {
+                    $set: { accountStatus },
+                });
+
+                res.status(200).json({
+                    ...updatedAccount._doc,
+                    accountStatus,
+                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Account not found" })
@@ -235,24 +221,24 @@ router.patch("/status/:id", async (req, res) => {
 
 router.patch("/address/:id", async (req, res) => {
     const { serviceAddress } = req.body;
+    const { id } = req.params;
 
     try {
-        await Account.findById(req.params.id, "-isDeleted -__v")
+        await Account.findById(id)
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
 
-                const updatedAccount = await Account.findByIdAndUpdate(
-                    req.params.id,
-                    {
-                        $set: { serviceAddress: serviceAddress },
-                    }
-                );
+                const updatedAccount = await Account.findByIdAndUpdate(id, {
+                    $set: { serviceAddress },
+                });
 
-                updatedAccount.serviceAddress = serviceAddress;
-                res.status(200).json(updatedAccount);
+                res.status(200).json({
+                    ...updatedAccount._doc,
+                    serviceAddress,
+                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Account not found" })
@@ -265,22 +251,24 @@ router.patch("/address/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        await Account.findById(req.params.id, "-isDeleted -__v")
+        await Account.findById(id)
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
 
-                const deletedAccount = await Account.findByIdAndUpdate(
-                    req.params.id,
-                    {
-                        $set: { isDeleted: true },
-                    }
-                );
-                deletedAccount.isDeleted = true;
-                res.status(200).json(deletedAccount);
+                const deletedAccount = await Account.findByIdAndUpdate(id, {
+                    $set: { isDeleted: true },
+                });
+
+                res.status(200).json({
+                    ...deletedAccount._doc,
+                    isDeleted: true,
+                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Account not found" })
@@ -293,9 +281,23 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedAccount = await Account.findByIdAndDelete(req.params.id);
-        res.status(200).json(deletedAccount);
+        await Account.findById(id)
+            .then(async (account) => {
+                if (account.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Account not found" });
+
+                const deletedAccount = await Account.findByIdAndDelete(id);
+
+                res.status(200).json(deletedAccount);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Account not found" })
+            );
     } catch (err) {
         res.status(500).json({
             message: "Error. Please contact your administrator.",

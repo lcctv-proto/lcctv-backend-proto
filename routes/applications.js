@@ -1,14 +1,16 @@
 const router = require("express").Router();
 const Application = require("../models/Application");
 const Account = require("../models/Account");
+const { getPrefix } = require("../utils/getPrefix");
 
 router.get("/", async (req, res) => {
     try {
         const applications = await Application.find().populate({
             path: "accountID",
-            populate: { path: "packageID", select: "-pkg_ctr -__v" },
+            populate: { path: "packageID", select: "-__v" },
             select: "-__v",
         });
+
         res.status(200).json(
             applications.filter((application) => !application.isDeleted)
         );
@@ -20,22 +22,21 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const type = req.query.type;
         if (type === "custom") {
-            //REF-210729002
-            const id = req.params.id;
+            //REF-210729 002
             const prefix = id.toUpperCase().substring(0, 10);
             const ref_ctr = parseInt(id.toUpperCase().substring(10), 10);
-            await Application.findOne(
-                { prefix: prefix, ref_ctr: ref_ctr },
-                "-__v"
-            )
+
+            await Application.findOne({ prefix, ref_ctr }, "-__v")
                 .populate({
                     path: "accountID",
                     populate: {
                         path: "packageID",
-                        select: "-pkg_ctr -__v",
+                        select: "-__v",
                     },
                     select: "-__v",
                 })
@@ -44,6 +45,7 @@ router.get("/:id", async (req, res) => {
                         return res
                             .status(404)
                             .json({ message: "Application not found" });
+
                     res.status(200).json(application);
                 })
                 .catch((err) => {
@@ -55,7 +57,7 @@ router.get("/:id", async (req, res) => {
                     path: "accountID",
                     populate: {
                         path: "packageID",
-                        select: "-pkg_ctr -__v",
+                        select: "-__v",
                     },
                     select: "-__v",
                 })
@@ -64,6 +66,7 @@ router.get("/:id", async (req, res) => {
                         return res
                             .status(404)
                             .json({ message: "Application not found" });
+
                     res.status(200).json(application);
                 })
                 .catch((err) => {
@@ -80,21 +83,9 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { remarks, accountID } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getUTCDate()).padStart(2, "0");
-    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-    const yy = today.getFullYear().toString().substr(-2);
-
-    const prefix = `REF-${yy}${mm}${dd}`;
-
     const application = new Application({
-        prefix: prefix,
-        date: Date.now(),
-        status: "PENDING PAYMENT",
-        step: 1,
-        remarks: remarks,
-        accountID: accountID,
-        isDeleted: false,
+        remarks,
+        accountID,
     });
 
     try {
@@ -121,9 +112,10 @@ router.post("/", async (req, res) => {
 
 router.patch("/status/:id", async (req, res) => {
     const { status, step } = req.body;
+    const { id } = req.params;
 
     try {
-        await Application.findById(req.params.id, "-__v")
+        await Application.findById(id)
             .then(async (application) => {
                 if (application.isDeleted)
                     return res
@@ -131,15 +123,17 @@ router.patch("/status/:id", async (req, res) => {
                         .json({ message: "Application not found" });
 
                 const updatedApplication = await Application.findByIdAndUpdate(
-                    req.params.id,
+                    id,
                     {
-                        $set: { status: status, step: step },
+                        $set: { status, step },
                     }
                 );
 
-                updatedApplication.status = status;
-                updatedApplication.step = step;
-                res.status(200).json(updatedApplication);
+                res.status(200).json({
+                    ...updatedApplication._doc,
+                    status,
+                    step,
+                });
             })
             .catch((err) => {
                 res.status(404).json({ message: "Application not found" });
@@ -153,9 +147,10 @@ router.patch("/status/:id", async (req, res) => {
 
 router.patch("/account/:id", async (req, res) => {
     const { accountID } = req.body;
+    const { id } = req.params;
 
     try {
-        await Application.findById(req.params.id, "-__v")
+        await Application.findById(id)
             .then(async (application) => {
                 if (application.isDeleted)
                     return res
@@ -170,12 +165,14 @@ router.patch("/account/:id", async (req, res) => {
                                 .json({ message: "Account not found" });
 
                         const updatedApplication =
-                            await Application.findByIdAndUpdate(req.params.id, {
-                                $set: { accountID: accountID },
+                            await Application.findByIdAndUpdate(id, {
+                                $set: { accountID },
                             });
 
-                        updatedApplication.accountID = accountID;
-                        res.status(200).json(updatedApplication);
+                        res.status(200).json({
+                            ...updatedApplication._doc,
+                            accountID,
+                        });
                     })
                     .catch((err) =>
                         res.status(404).json({ message: "Account not found" })
@@ -193,9 +190,10 @@ router.patch("/account/:id", async (req, res) => {
 
 router.patch("/remarks/:id", async (req, res) => {
     const { remarks } = req.body;
+    const { id } = req.params;
 
     try {
-        await Application.findById(req.params.id, "-__v")
+        await Application.findById(id, "-__v")
             .then(async (application) => {
                 if (application.isDeleted)
                     return res
@@ -203,28 +201,32 @@ router.patch("/remarks/:id", async (req, res) => {
                         .json({ message: "Application not found" });
 
                 const updatedApplication = await Application.findByIdAndUpdate(
-                    req.params.id,
+                    id,
                     {
-                        $set: { remarks: remarks },
+                        $set: { remarks },
                     }
                 );
 
-                updatedApplication.remarks = remarks;
-                res.status(200).json(updatedApplication);
+                res.status(200).json({
+                    ...updatedApplication._doc,
+                    remarks,
+                });
             })
             .catch((err) => {
                 res.status(404).json({ message: "Application not found" });
             });
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        await Application.findById(req.params.id, "-__v")
+        await Application.findById(id, "-__v")
             .then(async (application) => {
                 if (application.isDeleted)
                     return res
@@ -232,32 +234,49 @@ router.delete("/:id", async (req, res) => {
                         .json({ message: "Application not found" });
 
                 const deletedApplication = await Application.findByIdAndUpdate(
-                    req.params.id,
+                    id,
                     {
                         $set: { isDeleted: true },
                     }
                 );
-                deletedApplication.isDeleted = true;
-                res.status(200).json(deletedApplication);
+
+                res.status(200).json({
+                    ...deletedApplication._doc,
+                    isDeleted: true,
+                });
             })
             .catch((err) => {
                 res.status(404).json({ message: "Application not found" });
             });
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedApplication = await Application.findByIdAndDelete(
-            req.params.id
-        );
-        res.status(200).json(deletedApplication);
+        await Application.findById(id, "-__v")
+            .then(async (application) => {
+                if (application.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Application not found" });
+
+                const deletedApplication = await Application.findByIdAndDelete(
+                    id
+                );
+
+                res.status(200).json(deletedApplication);
+            })
+            .catch((err) => {
+                res.status(404).json({ message: "Application not found" });
+            });
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
