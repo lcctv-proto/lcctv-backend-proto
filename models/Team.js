@@ -13,7 +13,10 @@ const TeamSchema = mongoose.Schema({
         uppercase: true,
         trim: true,
     },
-    installations: Number,
+    installations: {
+        type: Number,
+        default: 0,
+    },
     areaID: { type: mongoose.Schema.Types.ObjectId, ref: "Areas" },
     personnelIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Personnel" }],
     isDeleted: {

@@ -8,7 +8,10 @@ const InvoiceSchema = mongoose.Schema({
         uppercase: true,
         default: getPrefix("yymmdd", "INV-"),
     },
-    date: Date,
+    date: {
+        type: Date,
+        default: Date.now(),
+    },
     amountDue: Number,
     accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     isDeleted: {

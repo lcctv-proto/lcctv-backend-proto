@@ -8,7 +8,10 @@ const PaymentSchema = mongoose.Schema({
         uppercase: true,
         default: getPrefix("yymmdd", "PAY-"),
     },
-    date: Date,
+    date: {
+        type: Date,
+        default: Date.now(),
+    },
     feeIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fees" }],
     amountPaid: Number,
     dateIssued: Date, // For Check, GCash, PayMaya, ShopeePay, BayadCenter, dragonPay

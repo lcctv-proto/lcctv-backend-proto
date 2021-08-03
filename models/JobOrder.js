@@ -14,7 +14,10 @@ const JobOrderSchema = mongoose.Schema({
         uppercase: true,
         default: getPrefix("yymmdd", "JO-"),
     },
-    date: Date,
+    date: {
+        type: Date,
+        default: Date.now(),
+    },
     jobDate: Date,
     branch: {
         type: String,
@@ -25,6 +28,7 @@ const JobOrderSchema = mongoose.Schema({
         type: String,
         uppercase: true,
         trim: true,
+        default: "PENDING",
         enum: ["PENDING", "ONGOING", "CLOSED"],
     }, // Can be "PENDING", "ONGOING", "CLOSED"
     type: {

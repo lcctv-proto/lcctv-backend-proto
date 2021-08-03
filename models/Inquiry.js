@@ -12,8 +12,12 @@ const InquirySchema = mongoose.Schema({
         type: String,
         uppercase: true,
         trim: true,
+        default: "PENDING", // "DENIED", "CLOSED(TO JO)", "CLOSED(GEN INQ)", "CLOSED(CASHIER)"
     },
-    date: Date,
+    date: {
+        type: Date,
+        default: Date.now(),
+    },
     contactNumber: {
         type: String,
         uppercase: true,
