@@ -86,7 +86,7 @@ router.patch("/installations/:id", async (req, res) => {
 
     try {
         await Team.findById(id)
-            .then((team) => {
+            .then(async (team) => {
                 if (team.isDeleted)
                     return res.status(404).json({ message: "Team not found" });
 
