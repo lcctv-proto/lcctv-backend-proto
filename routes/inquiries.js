@@ -3,31 +3,59 @@ const Inquiry = require("../models/Inquiry");
 
 router.get("/", async (req, res) => {
     try {
-        const inquiries = await Inquiry.find().populate(
+        const inquiries = await Inquiry.find({}, "-__v").populate(
             "accountID",
             "_id accountName"
         );
+
         res.status(200).json(inquiries.filter((inquiry) => !inquiry.isDeleted));
     } catch (err) {
-        res.status(400).json({
-            message: err,
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const inquiry = await Inquiry.findById(req.params.id).populate(
-            "accountID",
-            "_id accountName"
-        );
+        if (type === "custom") {
+            // INQ-210729 001
+            const prefix = id.toUpperCase().substring(0, 10);
+            const inq_ctr = parseInt(id.toUpperCase().substring(10), 10);
 
-        if (inquiry.isDeleted)
-            return res.status(404).json({ message: "Inquiry not found" });
+            await Inquiry.findOne({ prefix, inq_ctr }, "-__v")
+                .populate("accountID", "accountName")
+                .then((inquiry) => {
+                    if (inquiry.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Inquiry not found" });
 
-        res.status(200).json(inquiry);
+                    res.status(200).json(inquiry);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Inquiry not found" })
+                );
+        } else {
+            await Inquiry.findById(id, "-__v")
+                .populate("accountID", "accountName")
+                .then((inquiry) => {
+                    if (inquiry.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Inquiry not found" });
+
+                    res.status(200).json(inquiry);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Inquiry not found" })
+                );
+        }
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -36,31 +64,31 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { contactNumber, email, type, description, accountID } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `INQ-${yyyy}${mm}${dd}`;
-
     const inquiry = new Inquiry({
-        prefix: prefix,
-        date: Date.now(),
-        // date: "2000-02-17T00:00:00.000Z",
-        status: "PENDING", // "DENIED", "CLOSED(TO JO)", "CLOSED(GEN INQ)", "CLOSED(CASHIER)"
-        contactNumber: contactNumber,
-        email: email,
-        type: type,
-        description: description,
-        accountID: accountID,
-        isDeleted: false,
+        contactNumber,
+        email,
+        type,
+        description,
+        accountID,
     });
 
     try {
-        const savedInquiry = await inquiry.save();
-        res.status(201).json(savedInquiry);
+        await Account.findById(accountID)
+            .then(async (account) => {
+                if (account.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Account not found" });
+
+                const savedInquiry = await inquiry.save();
+
+                res.status(201).json(savedInquiry);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Account not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -68,50 +96,85 @@ router.post("/", async (req, res) => {
 
 router.patch("/status/:id", async (req, res) => {
     const { status } = req.body;
+    const { id } = req.params;
 
     try {
-        const inquiry = await Inquiry.findById(req.params.id);
+        await Inquiry.findById(id)
+            .then(async (inquiry) => {
+                if (inquiry.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Inquiry not found" });
 
-        if (inquiry.isDeleted)
-            res.status(404).json({ message: "Inquiry not found" });
+                const updatedInquiry = await Inquiry.findByIdAndUpdate(id, {
+                    $set: { status },
+                });
 
-        const updatedInquiry = await Inquiry.findByIdAndUpdate(req.params.id, {
-            $set: { status: status },
-        });
-        updatedInquiry.status = status;
-        res.status(200).json(updatedInquiry);
+                res.status(200).json({
+                    ...updatedInquiry._doc,
+                    status,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Inquiry not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const inquiry = await Inquiry.findById(req.params.id);
+        await Inquiry.findById(id)
+            .then(async (inquiry) => {
+                if (inquiry.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Inquiry not found" });
 
-        if (inquiry.isDeleted)
-            res.status(404).json({ message: "Inquiry not found" });
+                const deletedInquiry = await Inquiry.findByIdAndUpdate(id, {
+                    $set: { isDeleted: true },
+                });
 
-        const deletedInquiry = await Inquiry.findByIdAndUpdate(req.params.id, {
-            $set: { isDeleted: true },
-        });
-        deletedInquiry.isDeleted = true;
-        res.status(200).json(deletedInquiry);
+                res.status(200).json({
+                    ...deletedInquiry._doc,
+                    isDeleted: true,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Inquiry not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedInquiry = await Inquiry.findByIdAndDelete(req.params.id);
-        res.status(200).json(deletedInquiry);
+        await Inquiry.findById(id)
+            .then(async (inquiry) => {
+                if (inquiry.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Inquiry not found" });
+
+                const deletedInquiry = await Inquiry.findByIdAndDelete(id);
+
+                res.status(200).json(deletedInquiry);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Inquiry not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }

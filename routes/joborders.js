@@ -1,9 +1,13 @@
 const router = require("express").Router();
 const JobOrder = require("../models/JobOrder");
+const Account = require("../models/Account");
+const Application = require("../models/Application");
+const Inquiry = require("../models/Inquiry");
+const Team = require("../models/Team");
 
 router.get("/", async (req, res) => {
     try {
-        const jos = await JobOrder.find()
+        const jos = await JobOrder.find({}, "-__v")
             .populate("accountID", "_id accountName")
             .populate({
                 path: "teamID",
@@ -13,107 +17,175 @@ router.get("/", async (req, res) => {
             .populate("applicationID", "date status")
             .populate(
                 "inquiryID",
-                "-_id -prefix -date -isDeleted -inq_ctr -__v -accountID"
+                "-_id -prefix -date -inq_ctr -__v -accountID"
             )
             .populate({
                 path: "equipmentsUsed",
                 populate: { path: "equipmentID", select: "description price" },
             });
+
         res.status(200).json(jos.filter((jo) => !jo.isDeleted));
     } catch (err) {
-        res.status(400).json({
-            message: err,
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const jo = await JobOrder.findById(req.params.id)
-            .populate("accountID", "_id accountName")
-            .populate({
-                path: "teamID",
-                populate: { path: "personnelIDs", select: "personnelName" },
-                select: "personnelIDs description",
-            })
-            .populate("applicationID", "date status")
-            .populate(
-                "inquiryID",
-                "-_id -prefix -date -isDeleted -inq_ctr -__v -accountID"
-            )
-            .populate({
-                path: "equipmentsUsed",
-                populate: { path: "equipmentID", select: "description price" },
-            });
+        if (type === "custom") {
+            // JO-210801 001
+            const prefix = id.toUpperCase().substring(0, 9);
+            const jo_ctr = parseInt(id.toUpperCase().substring(9), 10);
 
-        if (jo.isDeleted)
-            return res.status(404).json({ message: "Job Order not found" });
+            await JobOrder.findOne({ prefix, jo_ctr }, "-__v")
+                .populate("accountID", "_id accountName")
+                .populate({
+                    path: "teamID",
+                    populate: { path: "personnelIDs", select: "personnelName" },
+                    select: "personnelIDs description",
+                })
+                .populate("applicationID", "date status")
+                .populate(
+                    "inquiryID",
+                    "-_id -prefix -date -inq_ctr -__v -accountID"
+                )
+                .populate({
+                    path: "equipmentsUsed",
+                    populate: {
+                        path: "equipmentID",
+                        select: "description price",
+                    },
+                })
+                .then((jo) => {
+                    if (jo.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Job Order not found" });
 
-        res.status(200).json(jo);
+                    res.status(200).json(jo);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Job Order not found" })
+                );
+        } else {
+            await JobOrder.findById(id, "-__v")
+                .populate("accountID", "_id accountName")
+                .populate({
+                    path: "teamID",
+                    populate: { path: "personnelIDs", select: "personnelName" },
+                    select: "personnelIDs description",
+                })
+                .populate("applicationID", "date status")
+                .populate(
+                    "inquiryID",
+                    "-_id -prefix -date -inq_ctr -__v -accountID"
+                )
+                .populate({
+                    path: "equipmentsUsed",
+                    populate: {
+                        path: "equipmentID",
+                        select: "description price",
+                    },
+                })
+                .then((jo) => {
+                    if (jo.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Job Order not found" });
+
+                    res.status(200).json(jo);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Job Order not found" })
+                );
+        }
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
-router.post("/installation/", async (req, res) => {
+router.post("/installation", async (req, res) => {
     const { type, remarks, applicationID, accountID } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `JO-${yyyy}${mm}${dd}`;
-
     const jo = new JobOrder({
-        prefix: prefix,
-        date: Date.now(),
-        status: "PENDING",
-        type: type,
-        remarks: remarks,
-        applicationID: applicationID,
-        accountID: accountID,
-        isDeleted: false,
+        type,
+        remarks,
+        applicationID,
+        accountID,
     });
 
     try {
+        const account = await Account.findById(accountID)
+            .then((account) => {
+                if (account.isDeleted) return false;
+                return true;
+            })
+            .catch((err) => false);
+
+        const application = await Application.findById(applicationID)
+            .then((application) => {
+                if (application.isDeleted) return false;
+                return true;
+            })
+            .catch((err) => false);
+
+        if (!account)
+            return res.status(404).json({ message: "Account not found" });
+        if (!application)
+            return res.status(404).json({ message: "Application not found" });
+
         const savedJO = await jo.save();
+
         res.status(201).json(savedJO);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
-router.post("/maintenance/", async (req, res) => {
+router.post("/maintenance", async (req, res) => {
     const { type, remarks, inquiryID, accountID } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `JO-${yyyy}${mm}${dd}`;
-
     const jo = new JobOrder({
-        prefix: prefix,
-        date: Date.now(),
-        status: "PENDING",
-        type: type,
-        remarks: remarks,
-        inquiryID: inquiryID,
-        accountID: accountID,
-        isDeleted: false,
+        type,
+        remarks,
+        inquiryID,
+        accountID,
     });
 
     try {
+        const account = await Account.findById(accountID)
+            .then((account) => {
+                if (account.isDeleted) return false;
+                return true;
+            })
+            .catch((err) => false);
+
+        const inquiry = await Inquiry.findById(inquiryID)
+            .then((inquiry) => {
+                if (inquiry.isDeleted) return false;
+                return true;
+            })
+            .catch((err) => false);
+
+        if (!account)
+            return res.status(404).json({ message: "Inquiry not found" });
+        if (!inquiry)
+            return res.status(404).json({ message: "Application not found" });
+
         const savedJO = await jo.save();
+
         res.status(201).json(savedJO);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -121,33 +193,48 @@ router.post("/maintenance/", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
     const { jobDate, status, branch, teamID } = req.body;
+    const { id } = req.params;
 
     try {
-        const jo = await JobOrder.findById(req.params.id);
+        await JobOrder.findById(id, "-__v")
+            .then(async (jo) => {
+                if (jo.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Job Order not found" });
 
-        if (jo.isDeleted)
-            res.status(404).json({ message: "Job Order not found" });
+                await Team.findById(id).then(async (team) => {
+                    if (team.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Team not found" });
 
-        const updatedJobOrder = await JobOrder.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: {
-                    jobDate: jobDate,
-                    status: status,
-                    branch: branch,
-                    teamID: teamID,
-                },
-            }
-        );
+                    const updatedJobOrder = await JobOrder.findByIdAndUpdate(
+                        id,
+                        {
+                            $set: {
+                                jobDate,
+                                status,
+                                branch,
+                                teamID,
+                            },
+                        }
+                    );
 
-        updatedJobOrder.jobDate = jobDate;
-        updatedJobOrder.status = status;
-        updatedJobOrder.branch = branch;
-        updatedJobOrder.teamID = teamID;
-
-        res.status(200).json(updatedJobOrder);
+                    res.status(200).json({
+                        ...updatedJobOrder._doc,
+                        jobDate,
+                        status,
+                        branch,
+                        teamID,
+                    });
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Job Order not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -155,59 +242,85 @@ router.patch("/:id", async (req, res) => {
 
 router.patch("/equipments/:id", async (req, res) => {
     const { equipmentsUsed } = req.body;
+    const { id } = req.params;
 
     try {
-        const jo = await JobOrder.findById(req.params.id);
+        await JobOrder.findById(id)
+            .then(async (jo) => {
+                if (jo.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Job Order not found" });
 
-        if (jo.isDeleted)
-            res.status(404).json({ message: "Job Order not found" });
+                const updatedJobOrder = await JobOrder.findByIdAndUpdate(id, {
+                    $set: { equipmentsUsed },
+                });
 
-        const updatedJobOrder = await JobOrder.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: { equipmentsUsed: equipmentsUsed },
-            }
-        );
-
-        updatedJobOrder.equipmentsUsed = equipmentsUsed;
-        res.status(200).json(updatedJobOrder);
+                res.status(200).json({
+                    ...updatedJobOrder._doc,
+                    equipmentsUsed,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Job Order not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const jo = await JobOrder.findById(req.params.id);
+        await JobOrder.findById(id)
+            .then(async (jo) => {
+                if (jo.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Job Order not found" });
 
-        if (jo.isDeleted)
-            res.status(404).json({ message: "Job Order not found" });
+                const deletedJobOrder = await JobOrder.findByIdAndUpdate(id, {
+                    $set: { isDeleted: true },
+                });
 
-        const deletedJobOrders = await JobOrder.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: { isDeleted: true },
-            }
-        );
-        deletedJobOrders.isDeleted = true;
-        res.status(200).json(deletedJobOrders);
+                res.status(200).json({
+                    ...deletedJobOrder._doc,
+                    isDeleted: true,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Job Order not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedJobOrders = await JobOrder.findByIdAndDelete(
-            req.params.id
-        );
-        res.status(200).json(deletedJobOrders);
+        await JobOrder.findById(id)
+            .then(async (jo) => {
+                if (jo.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Job Order not found" });
+
+                const deletedJobOrder = await JobOrder.findByIdAndDelete(id);
+
+                res.status(200).json(deletedJobOrder);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Job Order not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }

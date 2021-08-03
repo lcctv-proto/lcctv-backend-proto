@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const Application = require("../models/Application");
 const Account = require("../models/Account");
-const { getPrefix } = require("../utils/getPrefix");
 
 router.get("/", async (req, res) => {
     try {

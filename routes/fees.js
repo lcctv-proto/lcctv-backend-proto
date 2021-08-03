@@ -3,24 +3,54 @@ const Fee = require("../models/Fee");
 
 router.get("/", async (req, res) => {
     try {
-        const fees = await Fee.find();
+        const fees = await Fee.find({}, "-__v");
+
         res.status(200).json(fees.filter((fee) => !fee.isDeleted));
     } catch (err) {
-        res.status(400).json({
-            message: err,
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.get("/:id", async (req, res) => {
-    try {
-        const fee = await Fee.findById(req.params.id);
+    const { id } = req.params;
+    const { type } = req.query;
 
-        !fee.isDeleted
-            ? res.status(200).json(fee)
-            : res.status(404).json({ message: "Fee not found" });
+    try {
+        if (type === "custom") {
+            // FEE-210729 001
+            const prefix = id.toUpperCase().substring(0, 10);
+            const fee_ctr = parseInt(id.toUpperCase().substring(10), 10);
+
+            await Fee.findOne({ prefix, fee_ctr }, "-__v")
+                .then((fee) => {
+                    if (fee.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Fee not found" });
+
+                    res.status(200).json(fee);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Fee not found" })
+                );
+        } else {
+            await Fee.findById(id, "-__v")
+                .then((fee) => {
+                    if (fee.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Fee not found" });
+
+                    res.status(200).json(fee);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Fee not found" })
+                );
+        }
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -29,25 +59,17 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { description, price } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `FEE-${yyyy}${mm}${dd}`;
-
     const fee = new Fee({
-        prefix: prefix,
-        description: description,
-        price: price,
-        isDeleted: false,
+        description,
+        price,
     });
 
     try {
         const savedFee = await fee.save();
+
         res.status(201).json(savedFee);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -55,51 +77,74 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     const { description, price } = req.body;
+    const { id } = req.params;
 
     try {
-        const fee = await Fee.findById(req.params.id);
+        await Fee.findById(id)
+            .then(async (fee) => {
+                if (fee.isDeleted)
+                    return res.status(404).json({ message: "Fee not found" });
 
-        if (fee.isDeleted) res.status(404).json({ message: "Fee not found" });
+                const updatedFee = await Fee.findByIdAndUpdate(id, {
+                    $set: { description, price },
+                });
 
-        const updatedFee = await Fee.findByIdAndUpdate(req.params.id, {
-            $set: { description: description, price: price },
-        });
-
-        updatedFee.description = description;
-        updatedFee.price = price;
-
-        res.status(200).json(updatedFee);
+                res.status(200).json({
+                    ...updatedFee._doc,
+                    description,
+                    price,
+                });
+            })
+            .catch((err) => res.status(404).json({ message: "Fee not found" }));
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const fee = await Fee.findById(req.params.id);
+        await Fee.findById(id)
+            .then(async (fee) => {
+                if (fee.isDeleted)
+                    return res.status(404).json({ message: "Fee not found" });
 
-        if (fee.isDeleted) res.status(404).json({ message: "Fee not found" });
+                const deletedFee = await Fee.findByIdAndUpdate(id, {
+                    $set: { isDeleted: true },
+                });
 
-        const deletedFee = await Fee.findByIdAndUpdate(req.params.id, {
-            $set: { isDeleted: true },
-        });
-        deletedFee.isDeleted = true;
-        res.status(200).json(deletedFee);
+                res.status(200).json({
+                    ...deletedFee._doc,
+                    isDeleted: true,
+                });
+            })
+            .catch((err) => res.status(404).json({ message: "Fee not found" }));
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedFee = await Fee.findByIdAndDelete(req.params.id);
-        res.status(200).json(deletedFee);
+        await Fee.findById(id)
+            .then(async (fee) => {
+                if (fee.isDeleted)
+                    return res.status(404).json({ message: "Fee not found" });
+
+                const deletedFee = await Fee.findByIdAndDelete(id);
+
+                res.status(200).json(deletedFee);
+            })
+            .catch((err) => res.status(404).json({ message: "Fee not found" }));
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }

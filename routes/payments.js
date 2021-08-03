@@ -3,29 +3,60 @@ const Payment = require("../models/Payment");
 
 router.get("/", async (req, res) => {
     try {
-        const payments = await Payment.find()
-            .populate("accountID", "_id accountName")
-            .populate("feeIDs", "name description price -_id");
+        const payments = await Payment.find({}, "-__v")
+            .populate("accountID", "accountName")
+            .populate("feeIDs", "name description price");
+
         res.status(200).json(payments.filter((payment) => !payment.isDeleted));
     } catch (err) {
-        res.status(400).json({
-            message: err,
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const payment = await Payment.findById(req.params.id)
-            .populate("accountID", "_id accountName")
-            .populate("feeIDs", "name description price -_id");
+        if (type === "custom") {
+            // PAY-210801 001
+            const prefix = id.toUpperCase().substring(0, 10);
+            const pay_ctr = parseInt(id.toUpperCase().substring(10), 10);
 
-        if (payment.isDeleted)
-            return res.status(404).json({ message: "Payment not found" });
+            await Payment.findOne({ prefix, pay_ctr }, "-__v")
+                .populate("accountID", "accountName")
+                .populate("feeIDs", "name description price")
+                .then((payment) => {
+                    if (payment.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Payment not found" });
 
-        res.status(200).json(payment);
+                    res.status(200).json(payment);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Payment not found" })
+                );
+        } else {
+            await Payment.findById(id, "-__v")
+                .populate("accountID", "accountName")
+                .populate("feeIDs", "name description price")
+                .then((payment) => {
+                    if (payment.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Payment not found" });
+
+                    res.status(200).json(payment);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Payment not found" })
+                );
+        }
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -46,33 +77,35 @@ router.post("/", async (req, res) => {
         remarks,
     } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `PAY-${yyyy}${mm}${dd}`;
-
     const payment = new Payment({
-        prefix: prefix,
-        date: Date.now(),
-        feeIDs: feeIDs,
-        amountPaid: amountPaid,
-        dateIssued: dateIssued,
-        receiptNumber: receiptNumber,
-        referenceNumber: referenceNumber,
-        modeOfPayment: modeOfPayment,
-        issuingBank: issuingBank,
-        checkNumber: checkNumber,
-        checkAmount: checkAmount,
-        remarks: remarks,
-        accountID: accountID,
-        isDeleted: false,
+        feeIDs,
+        amountPaid,
+        dateIssued,
+        receiptNumber,
+        referenceNumber,
+        modeOfPayment,
+        issuingBank,
+        checkNumber,
+        checkAmount,
+        accountID,
+        remarks,
     });
 
     try {
-        const savedPayment = await payment.save();
-        res.status(201).json(savedPayment);
+        await Account.findById(accountID)
+            .then(async (account) => {
+                if (account.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Account not found" });
+
+                const savedPayment = await payment.save();
+
+                res.status(201).json(savedPayment);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Account not found" })
+            );
     } catch (err) {
         res.status(400).json({
             message: "Error. Please contact your administrator.",
@@ -81,17 +114,28 @@ router.post("/", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const payment = await Payment.findById(req.params.id);
+        await Payment.findById(id)
+            .then(async (payment) => {
+                if (payment.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Payment not found" });
 
-        if (payment.isDeleted)
-            res.status(404).json({ message: "Payment not found" });
+                const deletedPayment = await Payment.findByIdAndUpdate(id, {
+                    $set: { isDeleted: true },
+                });
 
-        const deletedPayment = await Payment.findByIdAndUpdate(req.params.id, {
-            $set: { isDeleted: true },
-        });
-        deletedPayment.isDeleted = true;
-        res.status(200).json(deletedPayment);
+                res.status(200).json({
+                    ...deletedPayment._doc,
+                    isDeleted: true,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Payment not found" })
+            );
     } catch (err) {
         res.status(400).json({
             message: "Error. Please contact your administrator.",
@@ -101,8 +145,22 @@ router.delete("/:id", async (req, res) => {
 
 router.delete("/hard/:id", async (req, res) => {
     try {
-        const deletedPayment = await Payment.findByIdAndDelete(req.params.id);
-        res.status(200).json(deletedPayment);
+        await Payment.findById(id)
+            .then(async (payment) => {
+                if (payment.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Payment not found" });
+
+                const deletedPayment = await Payment.findByIdAndDelete(
+                    req.params.id
+                );
+
+                res.status(200).json(deletedPayment);
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Payment not found" })
+            );
     } catch (err) {
         res.status(400).json({
             message: "Error. Please contact your administrator.",

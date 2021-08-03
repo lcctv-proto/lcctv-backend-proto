@@ -23,7 +23,7 @@ router.get("/:id", async (req, res) => {
             const prefix = id.toUpperCase().substring(0, 10);
             const pkg_ctr = parseInt(id.toUpperCase().substring(10), 10);
 
-            await Package.findOne({ prefix: prefix, pkg_ctr: pkg_ctr }, "-__v")
+            await Package.findOne({ prefix, pkg_ctr }, "-__v")
                 .then((pkg) => {
                     if (pkg.isDeleted)
                         return res
@@ -60,8 +60,8 @@ router.post("/", async (req, res) => {
     const { description, price } = req.body;
 
     const pack = new Package({
-        description: description,
-        price: price,
+        description,
+        price,
     });
 
     try {
@@ -88,13 +88,13 @@ router.put("/:id", async (req, res) => {
                         .json({ message: "Package not found" });
 
                 const updatedPackage = await Package.findByIdAndUpdate(id, {
-                    $set: { description: description, price: price },
+                    $set: { description, price },
                 });
 
                 res.status(200).json({
                     ...updatedPackage._doc,
-                    description: description,
-                    price: price,
+                    description,
+                    price,
                 });
             })
             .catch((err) =>

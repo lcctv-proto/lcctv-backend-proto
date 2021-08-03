@@ -3,9 +3,10 @@ const Team = require("../models/Team");
 
 router.get("/", async (req, res) => {
     try {
-        const teams = await Team.find()
+        const teams = await Team.find({}, "-__v")
             .populate("areaID", "-_id description imageURL")
             .populate("personnelIDs", "personnelName");
+
         res.status(200).json(teams.filter((team) => !team.isDeleted));
     } catch (err) {
         res.status(400).json({
@@ -15,17 +16,47 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { type } = req.query;
+
     try {
-        const team = await Team.findById(req.params.id)
-            .populate("areaID", "-_id description imageURL")
-            .populate("personnelIDs", "personnelName");
+        if (type === "custom") {
+            // TEAM-210801 001
+            const prefix = id.toUpperCase().substring(0, 11);
+            const team_ctr = parseInt(id.toUpperCase().substring(11), 10);
 
-        if (team.isDeleted)
-            return res.status(404).json({ message: "Team not found" });
+            await Team.findOne({ prefix, team_ctr }, "-__v")
+                .populate("areaID", "-_id description imageURL")
+                .populate("personnelIDs", "personnelName")
+                .then((team) => {
+                    if (team.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Team not found" });
 
-        res.status(200).json(team);
+                    res.status(200).json(team);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Team not found" })
+                );
+        } else {
+            await Team.findById(id, "-__v")
+                .populate("areaID", "-_id description imageURL")
+                .populate("personnelIDs", "personnelName")
+                .then((team) => {
+                    if (team.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Team not found" });
+
+                    res.status(200).json(team);
+                })
+                .catch((err) =>
+                    res.status(404).json({ message: "Team not found" })
+                );
+        }
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -34,44 +65,45 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     const { description, areaID } = req.body;
 
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-
-    const prefix = `TEAM-${yyyy}${mm}${dd}`;
-
     const team = new Team({
-        prefix: prefix,
-        description: description,
-        installations: 0,
-        areaID: areaID,
-        isDeleted: false,
+        description,
+        areaID,
     });
 
     try {
         const savedTeam = await team.save();
+
         res.status(201).json(savedTeam);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.patch("/installations/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const team = await Team.findById(req.params.id);
+        await Team.findById(id)
+            .then((team) => {
+                if (team.isDeleted)
+                    return res.status(404).json({ message: "Team not found" });
 
-        if (team.isDeleted) res.status(404).json({ message: "Team not found" });
+                const incrementedTeam = await Team.findByIdAndUpdate(id, {
+                    $inc: { installations: 1 },
+                });
 
-        const incrementedTeam = await Team.findByIdAndUpdate(req.params.id, {
-            $inc: { installations: 1 },
-        });
-        incrementedTeam.installations += 1;
-        res.status(200).json(incrementedTeam);
+                res.status(200).json({
+                    ...incrementedTeam._doc,
+                    installations: installations + 1,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Team not found" })
+            );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -79,45 +111,65 @@ router.patch("/installations/:id", async (req, res) => {
 
 router.patch("/personnel/:id", async (req, res) => {
     const { personnelIDs } = req.body;
+    const { id } = req.params;
 
     try {
-        const team = await Team.findById(req.params.id);
+        await Team.findById(id).then(async (team) => {
+            if (team.isDeleted)
+                return res.status(404).json({ message: "Team not found" });
 
-        if (team.isDeleted) res.status(404).json({ message: "Team not found" });
-        const updatedTeam = await Team.findByIdAndUpdate(req.params.id, {
-            $set: { personnelIDs: personnelIDs },
+            const updatedTeam = await Team.findByIdAndUpdate(id, {
+                $set: { personnelIDs },
+            });
+
+            res.status(200).json({
+                ...updatedTeam._doc,
+                personnelIDs,
+            });
         });
-        updatedTeam.personnelIDs = personnelIDs;
-        res.status(200).json(updatedTeam);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const team = await Team.findById(req.params.id);
+        await Team.findById(id).then(async (team) => {
+            if (team.isDeleted)
+                return res.status(404).json({ message: "Team not found" });
 
-        if (team.isDeleted) res.status(404).json({ message: "Team not found" });
+            const deletedTeam = await Team.findByIdAndUpdate(id, {
+                $set: { isDeleted: true },
+            });
 
-        const deletedTeam = await Team.findByIdAndUpdate(req.params.id, {
-            $set: { isDeleted: true },
+            res.status(200).json({
+                ...deletedTeam._doc,
+                isDeleted: true,
+            });
         });
-        deletedTeam.isDeleted = true;
-        res.status(200).json(deletedTeam);
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
 });
 
 router.delete("/hard/:id", async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const deletedTeam = await Team.findByIdAndDelete(req.params.id);
-        res.status(200).json(deletedTeam);
+        await Team.findById(id).then(async (team) => {
+            if (team.isDeleted)
+                return res.status(404).json({ message: "Team not found" });
+
+            const deletedTeam = await Team.findByIdAndDelete(id);
+
+            res.status(200).json(deletedTeam);
+        });
     } catch (err) {
         res.status(400).json({
             message: "Error. Please contact your administrator.",
