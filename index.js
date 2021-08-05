@@ -2,6 +2,7 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const cors = require('cors');
 require("dotenv").config();
 
 //user defined routes
@@ -36,6 +37,9 @@ mongoose.connect(
         console.log(`Connected to DB!`);
     }
 );
+
+//Middleware
+app.use(cors());
 
 //Routes
 app.use("/api/accounts", accounts);
