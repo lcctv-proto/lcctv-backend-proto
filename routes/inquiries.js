@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Inquiry = require("../models/Inquiry");
+const Account = require("../models/Account");
 
 router.get("/", async (req, res) => {
     try {
