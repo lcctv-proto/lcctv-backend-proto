@@ -4,10 +4,14 @@ const Account = require("../models/Account");
 
 router.get("/", async (req, res) => {
     try {
-        const inquiries = await Inquiry.find({}, "-__v").populate(
-            "accountID",
-            "_id accountName"
-        );
+        const inquiries = await Inquiry.find({}, "-__v").populate({
+            path: "accountID",
+            populate: {
+                path: "packageID",
+                select: "-__v",
+            },
+            select: "-__v",
+        });
 
         res.status(200).json(inquiries.filter((inquiry) => !inquiry.isDeleted));
     } catch (err) {
@@ -28,7 +32,14 @@ router.get("/:id", async (req, res) => {
             const inq_ctr = parseInt(id.toUpperCase().substring(10), 10);
 
             await Inquiry.findOne({ prefix, inq_ctr }, "-__v")
-                .populate("accountID", "accountName")
+                .populate({
+                    path: "accountID",
+                    populate: {
+                        path: "packageID",
+                        select: "-__v",
+                    },
+                    select: "-__v",
+                })
                 .then((inquiry) => {
                     if (inquiry.isDeleted)
                         return res
@@ -42,7 +53,14 @@ router.get("/:id", async (req, res) => {
                 );
         } else {
             await Inquiry.findById(id, "-__v")
-                .populate("accountID", "accountName")
+                .populate({
+                    path: "accountID",
+                    populate: {
+                        path: "packageID",
+                        select: "-__v",
+                    },
+                    select: "-__v",
+                })
                 .then((inquiry) => {
                     if (inquiry.isDeleted)
                         return res
