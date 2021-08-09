@@ -13,7 +13,7 @@ const PaymentSchema = mongoose.Schema({
         default: Date.now(),
     },
     feeIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fees" }],
-    amountPaid: Number,
+    amountPaid: Number, // Not needed for Check
     dateIssued: Date, // For Check, GCash, PayMaya, ShopeePay, BayadCenter, dragonPay
     receiptNumber: {
         type: String,

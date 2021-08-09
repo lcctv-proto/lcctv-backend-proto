@@ -1,10 +1,11 @@
 const router = require("express").Router();
 const Payment = require("../models/Payment");
+const Account = require("../models/Account");
 
 router.get("/", async (req, res) => {
     try {
         const payments = await Payment.find({}, "-__v")
-            .populate("accountID", "accountName")
+            .populate("accountID", "-__v")
             .populate("feeIDs", "name description price");
 
         res.status(200).json(payments.filter((payment) => !payment.isDeleted));
@@ -26,7 +27,7 @@ router.get("/:id", async (req, res) => {
             const pay_ctr = parseInt(id.toUpperCase().substring(10), 10);
 
             await Payment.findOne({ prefix, pay_ctr }, "-__v")
-                .populate("accountID", "accountName")
+                .populate("accountID", "-__v")
                 .populate("feeIDs", "name description price")
                 .then((payment) => {
                     if (payment.isDeleted)
@@ -41,7 +42,7 @@ router.get("/:id", async (req, res) => {
                 );
         } else {
             await Payment.findById(id, "-__v")
-                .populate("accountID", "accountName")
+                .populate("accountID", "-__v")
                 .populate("feeIDs", "name description price")
                 .then((payment) => {
                     if (payment.isDeleted)
@@ -107,7 +108,7 @@ router.post("/", async (req, res) => {
                 res.status(404).json({ message: "Account not found" })
             );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -137,7 +138,7 @@ router.delete("/:id", async (req, res) => {
                 res.status(404).json({ message: "Payment not found" })
             );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
@@ -162,7 +163,7 @@ router.delete("/hard/:id", async (req, res) => {
                 res.status(404).json({ message: "Payment not found" })
             );
     } catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
     }
