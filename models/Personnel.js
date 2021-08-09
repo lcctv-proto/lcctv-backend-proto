@@ -28,6 +28,15 @@ const PersonnelSchema = mongoose.Schema({
         default: getPrefix("yymmdd", "EMP-"),
     },
     personnelName: NameSchema,
+    dateEmployed: {
+        type: Date,
+        default: Date.now(),
+    },
+    contactNumber: {
+        type: String,
+        uppercase: true,
+        trim: true,
+    },
     username: {
         type: String,
         trim: true,

@@ -65,15 +65,16 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { personnelName, roleID } = req.body;
+    const { personnelName, contactNumber, roleID } = req.body;
 
     const personnel = new Personnel({
         personnelName,
+        contactNumber,
         roleID,
     });
 
     try {
-        await Role.findById(id, "-__v")
+        await Role.findById(roleID)
             .then(async (role) => {
                 if (role.isDeleted)
                     return res.status(404).json({ message: "Role not found" });
@@ -86,6 +87,7 @@ router.post("/", async (req, res) => {
                 res.status(404).json({ message: "Role not found" })
             );
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
