@@ -2,8 +2,11 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const cors = require('cors');
+const cors = require("cors");
 require("dotenv").config();
+
+//utils
+const { routes } = require("./utils/docs");
 
 //user defined routes
 const accounts = require("./routes/accounts");
@@ -24,6 +27,9 @@ const teams = require("./routes/teams");
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+//register view engine
+app.set("view engine", "ejs");
 
 //DB Connection
 mongoose.connect(
@@ -58,7 +64,7 @@ app.use("/api/roles", roles);
 app.use("/api/teams", teams);
 
 app.get("/", (req, res) => {
-    res.send("Hello World!");
+    res.render("index", { routes });
 });
 
 app.post("/", async (req, res) => {

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>API Documentation</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous"
+        />
+    </head>
+    <body class="bg-secondary">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"
+                    >LCCTV BACKEND API DOCUMENTATION</a
+                >
+            </div>
+        </nav>
+        <div class="container-fluid bg-secondary">
+            <div class="row mt-5">
+                <div class="col">
+                    <ul class="list-group">
+                        <% routes.forEach(route => { %>
+                        <div class="card bg-secondary mb-3">
+                            <div class="card-header bg-dark">
+                                <code><%= route.base %></code>
+                            </div>
+                            <div class="card-body">
+                                <% route.endpoints.forEach(e => { %>
+                                <div class="text-light mb-4">
+                                    <div
+                                        class="
+                                            row
+                                            border border-secondary
+                                            bg-dark
+                                            rounded-pill
+                                        "
+                                    >
+                                        <div class="col-1">ROUTE</div>
+                                        <div
+                                            class="
+                                                col
+                                                border-start
+                                                rounded-pill
+                                                border-secondary
+                                            "
+                                        >
+                                            <code><%= e.route %></code>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="
+                                            row
+                                            border border-secondary
+                                            bg-dark
+                                            rounded-pill
+                                            mt-1
+                                        "
+                                    >
+                                        <div class="col-1">METHOD</div>
+                                        <div
+                                            class="
+                                                col
+                                                border-start
+                                                rounded-pill
+                                                border-secondary
+                                            "
+                                        >
+                                            <code><%= e.method %></code>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="
+                                            row
+                                            border border-secondary
+                                            rounded
+                                            bg-dark
+                                            mt-1
+                                        "
+                                    >
+                                        <div class="col-1">BODY</div>
+                                        <div
+                                            class="
+                                                col
+                                                border-start
+                                                rounded
+                                                border-secondary
+                                            "
+                                        >
+                                            <% if (e.body.length !== 0) { %>
+                                            <code>
+                                                <ul>
+                                                    <% e.body.forEach(i => { %>
+                                                    <li><%= i %></li>
+                                                    <% }) %>
+                                                </ul>
+                                            </code>
+
+                                            <% } else { %>
+                                            <code> empty </code>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="
+                                            row
+                                            border border-secondary
+                                            rounded
+                                            bg-dark
+                                            mt-1
+                                        "
+                                    >
+                                        <div class="col-1">DESC</div>
+                                        <div
+                                            class="
+                                                col
+                                                border-start
+                                                rounded
+                                                border-secondary
+                                            "
+                                        >
+                                            <code> <%= e.desc %> </code>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <% });%>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
