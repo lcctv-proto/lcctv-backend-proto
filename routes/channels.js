@@ -173,7 +173,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/packages/:id", async (req, res) => {
     const { packages } = req.body;
     const { id } = req.params;
 

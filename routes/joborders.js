@@ -112,10 +112,10 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/installation", async (req, res) => {
-    const { type, remarks, applicationID, accountID } = req.body;
+    const { remarks, applicationID, accountID } = req.body;
 
     const jo = new JobOrder({
-        type,
+        type: "INSTALLATION",
         remarks,
         applicationID,
         accountID,
@@ -152,10 +152,10 @@ router.post("/installation", async (req, res) => {
 });
 
 router.post("/maintenance", async (req, res) => {
-    const { type, remarks, inquiryID, accountID } = req.body;
+    const { remarks, inquiryID, accountID } = req.body;
 
     const jo = new JobOrder({
-        type,
+        type: "MAINTENANCE",
         remarks,
         inquiryID,
         accountID,
@@ -191,7 +191,7 @@ router.post("/maintenance", async (req, res) => {
     }
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/team/:id", async (req, res) => {
     const { jobDate, status, branch, teamID } = req.body;
     const { id } = req.params;
 

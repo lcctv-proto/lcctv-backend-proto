@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Personnel = require("../models/Personnel");
 const Role = require("../models/Role");
+const bcrypt = require("bcryptjs");
 
 router.get("/", async (req, res) => {
     try {
@@ -93,8 +94,8 @@ router.post("/", async (req, res) => {
         });
     }
 });
-
-router.patch("/register/:id", async (req, res) => {
+const users = [];
+router.post("/register/:id", async (req, res) => {
     const { username, password } = req.body;
     const { id } = req.params;
 
@@ -106,20 +107,71 @@ router.patch("/register/:id", async (req, res) => {
                         .status(404)
                         .json({ personnel: "Personnel not found" });
 
-                const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
-                    $set: { username, password },
-                });
+                const salt = await bcrypt.genSalt();
+                const hashedPassword = await bcrypt.hash(password, salt);
 
-                res.status(200).json({
-                    ...updatedPersonnel._doc,
+                const user = {
                     username,
-                    password,
-                });
+                    password: hashedPassword,
+                };
+
+                users.push(user);
+                res.status(200).send(user);
+
+                // const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
+                //     $set: { username, password },
+                // });
+
+                // res.status(200).json({
+                //     ...updatedPersonnel._doc,
+                //     username,
+                //     password,
+                // });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Personnel not found" })
             );
     } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.post("/login/", async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const user = users.find((user) => user.username === username);
+        if (!user) return res.status(404).send("Username not found!");
+
+        if (await bcrypt.compare(password, user.password)) {
+            res.status(200).send("Login Success");
+        } else {
+            res.status(403).send("Login Failed");
+        }
+        // await Personnel.findById(id)
+        //     .then(async (personnel) => {
+        //         if (personnel.isDeleted)
+        //             return res
+        //                 .status(404)
+        //                 .json({ personnel: "Personnel not found" });
+
+        //         const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
+        //             $set: { username, password },
+        //         });
+
+        //         res.status(200).json({
+        //             ...updatedPersonnel._doc,
+        //             username,
+        //             password,
+        //         });
+        //     })
+        //     .catch((err) =>
+        //         res.status(404).json({ message: "Personnel not found" })
+        //     );
+    } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
