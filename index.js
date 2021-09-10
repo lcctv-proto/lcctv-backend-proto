@@ -46,6 +46,7 @@ mongoose.connect(
 
 //Middleware
 app.use(cors());
+app.use("/api/uploads/accounts", express.static("uploads/accounts"));
 
 //Routes
 app.use("/api/accounts", accounts);
