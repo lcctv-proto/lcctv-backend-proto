@@ -100,6 +100,10 @@ router.post("/", async (req, res) => {
                         .status(404)
                         .json({ message: "Account not found" });
 
+                await Account.findByIdAndUpdate(accountID, {
+                    $inc: { "billingInfo.accountDebit": amountPaid },
+                });
+
                 const savedPayment = await payment.save();
 
                 res.status(201).json(savedPayment);
