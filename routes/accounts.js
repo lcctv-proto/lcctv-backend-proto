@@ -1,6 +1,42 @@
 const router = require("express").Router();
 const Account = require("../models/Account");
 const Package = require("../models/Package");
+const crypto = require("crypto");
+const path = require("path");
+
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/accounts");
+    },
+    filename: (req, file, cb) => {
+        cb(null, crypto.randomUUID() + path.extname(file.originalname));
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg"
+    ) {
+        cb(null, true);
+    } else {
+        cb(new Error("Wrong File Type"), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: "2mb",
+    },
+    fileFilter,
+}).fields([
+    { name: "governmentIdImageURL", maxCount: 1 },
+    { name: "billingImageURL", maxCount: 1 },
+]);
 
 router.get("/", async (req, res) => {
     try {
@@ -62,16 +98,19 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", upload, async (req, res) => {
     const {
         accountName,
         additionalInfo,
         serviceAddress,
         contactInfo,
         packageID,
-        governmentIdImageURL,
-        billingImageURL,
-    } = req.body;
+    } = JSON.parse(req.body.payload);
+    console.log({ files: req.files });
+    console.log(req.body.payload);
+    console.log(req.files.governmentIdImageURL[0].path);
+    const governmentIdImageURL = req.files.governmentIdImageURL[0].path;
+    const billingImageURL = req.files.billingImageURL[0].path;
 
     const account = new Account({
         accountName,
