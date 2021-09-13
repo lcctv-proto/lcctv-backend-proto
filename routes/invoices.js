@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Invoice = require("../models/Invoice");
+const Account = require("../models/Account");
 
 router.get("/", async (req, res) => {
     try {
@@ -76,6 +77,10 @@ router.post("/", async (req, res) => {
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
+
+                await Account.findByIdAndUpdate(accountID, {
+                    $inc: { "billingInfo.accountCredit": amountDue },
+                });
 
                 const savedInvoice = await invoice.save();
 
