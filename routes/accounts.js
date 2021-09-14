@@ -3,15 +3,17 @@ const Account = require("../models/Account");
 const Package = require("../models/Package");
 const crypto = require("crypto");
 const path = require("path");
-
 const multer = require("multer");
+const multerAzure = require("multer-azure");
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/accounts");
-    },
-    filename: (req, file, cb) => {
-        cb(null, crypto.randomUUID() + path.extname(file.originalname));
+const storage = multerAzure({
+    connectionString: process.env.AZURE_CONN_STRING,
+    account: process.env.AZURE_ACCOUNT,
+    key: process.env.AZURE_KEY,
+    container: "images",
+    blobPathResolver: function (req, file, cb) {
+        const blobPath = crypto.randomUUID() + path.extname(file.originalname);
+        cb(null, blobPath);
     },
 });
 
@@ -106,11 +108,9 @@ router.post("/", upload, async (req, res) => {
         contactInfo,
         packageID,
     } = JSON.parse(req.body.payload);
-    console.log({ files: req.files });
-    console.log(req.body.payload);
-    console.log(req.files.governmentIdImageURL[0].path);
-    const governmentIdImageURL = req.files.governmentIdImageURL[0].path;
-    const billingImageURL = req.files.billingImageURL[0].path;
+
+    const governmentIdImageURL = req.files.governmentIdImageURL[0].url;
+    const billingImageURL = req.files.billingImageURL[0].url;
 
     const account = new Account({
         accountName,

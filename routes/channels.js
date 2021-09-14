@@ -1,6 +1,46 @@
 const router = require("express").Router();
 const Channel = require("../models/Channel");
 const Package = require("../models/Package");
+const crypto = require("crypto");
+const path = require("path");
+const multer = require("multer");
+const multerAzure = require("multer-azure");
+
+const storage = multerAzure({
+    connectionString: process.env.AZURE_CONN_STRING,
+    account: process.env.AZURE_ACCOUNT,
+    key: process.env.AZURE_KEY,
+    container: "channels",
+    blobPathResolver: function (req, file, cb) {
+        const blobPath = crypto.randomUUID() + path.extname(file.originalname);
+        cb(null, blobPath);
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg"
+    ) {
+        cb(null, true);
+    } else {
+        cb(new Error("Wrong File Type"), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: "2mb",
+    },
+    fileFilter,
+}).fields([
+    { name: "bannerImageURL", maxCount: 1 },
+    { name: "channelImage1URL", maxCount: 1 },
+    { name: "channelImage2URL", maxCount: 1 },
+    { name: "channelImage3URL", maxCount: 1 },
+]);
 
 router.get("/", async (req, res) => {
     try {
@@ -91,16 +131,16 @@ router.get("/packages/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
-    const {
-        description,
-        assignedNumber,
-        label,
-        bannerImageURL,
-        videoURL,
-        channelImages,
-        packages,
-    } = req.body;
+router.post("/", upload, async (req, res) => {
+    const { description, assignedNumber, label, videoURL, packages } =
+        JSON.parse(req.body.payload);
+
+    const bannerImageURL = req.files.bannerImageURL[0].url;
+    const channelImages = [
+        req.files.channelImage1URL[0].url,
+        req.files.channelImage2URL[0].url,
+        req.files.channelImage3URL[0].url,
+    ];
 
     const channel = new Channel({
         description,

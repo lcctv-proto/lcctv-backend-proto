@@ -1,5 +1,41 @@
 const router = require("express").Router();
 const Area = require("../models/Area");
+const crypto = require("crypto");
+const path = require("path");
+const multer = require("multer");
+const multerAzure = require("multer-azure");
+
+const storage = multerAzure({
+    connectionString: process.env.AZURE_CONN_STRING,
+    account: process.env.AZURE_ACCOUNT,
+    key: process.env.AZURE_KEY,
+    container: "areas",
+    blobPathResolver: function (req, file, cb) {
+        const blobPath = crypto.randomUUID() + path.extname(file.originalname);
+        console.log(file);
+        cb(null, blobPath);
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg"
+    ) {
+        cb(null, true);
+    } else {
+        cb(new Error("Wrong File Type"), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: "2mb",
+    },
+    fileFilter,
+});
 
 router.get("/", async (req, res) => {
     try {
@@ -56,8 +92,9 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
-    const { description, imageURL } = req.body;
+router.post("/", upload.single("imageURL"), async (req, res) => {
+    const { description } = JSON.parse(req.body.payload);
+    const imageURL = req.file.url;
 
     const area = new Area({
         description,
