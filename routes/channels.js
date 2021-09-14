@@ -132,7 +132,7 @@ router.get("/packages/:id", async (req, res) => {
 });
 
 router.post("/", upload, async (req, res) => {
-    const { description, assignedNumber, label, videoURL, packages } =
+    const { description, assignedNumber, label, videoURL, packages, isHD } =
         JSON.parse(req.body.payload);
 
     const bannerImageURL = req.files.bannerImageURL[0].url;
@@ -150,6 +150,7 @@ router.post("/", upload, async (req, res) => {
         videoURL,
         channelImages,
         packages,
+        isHD,
     });
 
     try {

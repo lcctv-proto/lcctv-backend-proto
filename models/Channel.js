@@ -37,6 +37,7 @@ const ChannelSchema = mongoose.Schema({
         },
     ],
     packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Packages" }],
+    isHD: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
 });
 
