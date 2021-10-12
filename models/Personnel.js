@@ -41,6 +41,7 @@ const PersonnelSchema = mongoose.Schema({
         type: String,
         trim: true,
         select: false,
+        unique: true,
     },
     password: {
         type: String,

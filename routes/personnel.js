@@ -2,6 +2,7 @@ const router = require("express").Router();
 const Personnel = require("../models/Personnel");
 const Role = require("../models/Role");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 router.get("/", async (req, res) => {
     try {
@@ -94,7 +95,9 @@ router.post("/", async (req, res) => {
         });
     }
 });
+
 const users = [];
+
 router.post("/register/:id", async (req, res) => {
     const { username, password } = req.body;
     const { id } = req.params;
@@ -110,23 +113,15 @@ router.post("/register/:id", async (req, res) => {
                 const salt = await bcrypt.genSalt();
                 const hashedPassword = await bcrypt.hash(password, salt);
 
-                const user = {
+                const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
+                    $set: { username, password: hashedPassword },
+                });
+
+                res.status(200).json({
+                    ...updatedPersonnel._doc,
                     username,
                     password: hashedPassword,
-                };
-
-                users.push(user);
-                res.status(200).send(user);
-
-                // const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
-                //     $set: { username, password },
-                // });
-
-                // res.status(200).json({
-                //     ...updatedPersonnel._doc,
-                //     username,
-                //     password,
-                // });
+                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Personnel not found" })
@@ -142,34 +137,26 @@ router.post("/login/", async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = users.find((user) => user.username === username);
+        const user = await Personnel.findOne(
+            { username },
+            "_id roleID username password"
+        );
+
         if (!user) return res.status(404).send("Username not found!");
 
         if (await bcrypt.compare(password, user.password)) {
-            res.status(200).send("Login Success");
-        } else {
-            res.status(403).send("Login Failed");
+            const token = jwt.sign(
+                { id: user._id, username, roleID: user.roleID },
+                process.env.TOKEN,
+                {
+                    expiresIn: "1h",
+                }
+            );
+
+            return res.status(200).send({ ...user._doc, token });
         }
-        // await Personnel.findById(id)
-        //     .then(async (personnel) => {
-        //         if (personnel.isDeleted)
-        //             return res
-        //                 .status(404)
-        //                 .json({ personnel: "Personnel not found" });
 
-        //         const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
-        //             $set: { username, password },
-        //         });
-
-        //         res.status(200).json({
-        //             ...updatedPersonnel._doc,
-        //             username,
-        //             password,
-        //         });
-        //     })
-        //     .catch((err) =>
-        //         res.status(404).json({ message: "Personnel not found" })
-        //     );
+        res.status(403).send("Wrong password!");
     } catch (err) {
         console.log(err);
         res.status(500).json({
