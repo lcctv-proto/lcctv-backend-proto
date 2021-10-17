@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const path = require("path");
 const multer = require("multer");
 const multerAzure = require("multer-azure");
+const auth = require("../auth/auth");
 
 const storage = multerAzure({
     connectionString: process.env.AZURE_CONN_STRING,
@@ -40,7 +41,7 @@ const upload = multer({
     { name: "billingImageURL", maxCount: 1 },
 ]);
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const accounts = await Account.find({}, "-__v").populate(
             "packageID",
@@ -55,7 +56,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -144,7 +145,7 @@ router.post("/", upload, async (req, res) => {
     }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
     const { accountName, additionalInfo, contactInfo } = req.body;
     const { id } = req.params;
 
@@ -181,7 +182,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-router.patch("/package/:id", async (req, res) => {
+router.patch("/package/:id", auth, async (req, res) => {
     const { packageID } = req.body;
     const { id } = req.params;
 
@@ -227,7 +228,7 @@ router.patch("/package/:id", async (req, res) => {
     }
 });
 
-router.patch("/status/:id", async (req, res) => {
+router.patch("/status/:id", auth, async (req, res) => {
     const { accountStatus } = req.body;
     const { id } = req.params;
 
@@ -258,7 +259,7 @@ router.patch("/status/:id", async (req, res) => {
     }
 });
 
-router.patch("/address/:id", async (req, res) => {
+router.patch("/address/:id", auth, async (req, res) => {
     const { serviceAddress } = req.body;
     const { id } = req.params;
 
@@ -289,7 +290,7 @@ router.patch("/address/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -319,7 +320,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

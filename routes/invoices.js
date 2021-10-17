@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const Invoice = require("../models/Invoice");
 const Account = require("../models/Account");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const invoices = await Invoice.find({}, "-__v").populate(
             "accountID",
@@ -17,7 +18,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { amountDue, accountID } = req.body;
 
     const invoice = new Invoice({
@@ -96,7 +97,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -126,7 +127,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

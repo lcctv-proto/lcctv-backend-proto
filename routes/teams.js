@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const Team = require("../models/Team");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const teams = await Team.find({}, "-__v")
             .populate("areaID", "-_id description imageURL")
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { description, areaID } = req.body;
 
     const team = new Team({
@@ -81,7 +82,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.patch("/installations/:id", async (req, res) => {
+router.patch("/installations/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -109,7 +110,7 @@ router.patch("/installations/:id", async (req, res) => {
     }
 });
 
-router.patch("/personnel/:id", async (req, res) => {
+router.patch("/personnel/:id", auth, async (req, res) => {
     const { personnelIDs } = req.body;
     const { id } = req.params;
 
@@ -134,7 +135,7 @@ router.patch("/personnel/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -158,7 +159,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

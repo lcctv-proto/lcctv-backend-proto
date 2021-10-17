@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const Role = require("../models/Role");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const roles = await Role.find({}, "-__v");
 
@@ -56,7 +57,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { description } = req.body;
 
     const role = new Role({
@@ -74,7 +75,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -102,7 +103,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

@@ -3,8 +3,9 @@ const Personnel = require("../models/Personnel");
 const Role = require("../models/Role");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const personnel_list = await Personnel.find({}, "-__v").populate(
             "roleID",
@@ -21,7 +22,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -66,7 +67,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { personnelName, contactNumber, roleID } = req.body;
 
     const personnel = new Personnel({
@@ -96,8 +97,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-const users = [];
-
 router.post("/register/:id", async (req, res) => {
     const { username, password } = req.body;
     const { id } = req.params;
@@ -113,15 +112,24 @@ router.post("/register/:id", async (req, res) => {
                 const salt = await bcrypt.genSalt();
                 const hashedPassword = await bcrypt.hash(password, salt);
 
-                const updatedPersonnel = await Personnel.findByIdAndUpdate(id, {
-                    $set: { username, password: hashedPassword },
-                });
+                const existingUsername = await Personnel.findOne({ username });
 
-                res.status(200).json({
-                    ...updatedPersonnel._doc,
-                    username,
-                    password: hashedPassword,
-                });
+                if (existingUsername) {
+                    return res.status(400).json({ message: "Username taken" });
+                } else {
+                    const updatedPersonnel = await Personnel.findByIdAndUpdate(
+                        id,
+                        {
+                            $set: { username, password: hashedPassword },
+                        }
+                    );
+
+                    return res.status(200).json({
+                        ...updatedPersonnel._doc,
+                        username,
+                        password: hashedPassword,
+                    });
+                }
             })
             .catch((err) =>
                 res.status(404).json({ message: "Personnel not found" })
@@ -156,7 +164,7 @@ router.post("/login/", async (req, res) => {
             return res.status(200).send({ ...user._doc, token });
         }
 
-        res.status(403).send("Wrong password!");
+        res.status(403).json({ message: "Wrong password!" });
     } catch (err) {
         console.log(err);
         res.status(500).json({
@@ -165,7 +173,7 @@ router.post("/login/", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -195,7 +203,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

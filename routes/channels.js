@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const path = require("path");
 const multer = require("multer");
 const multerAzure = require("multer-azure");
+const auth = require("../auth/auth");
 
 const storage = multerAzure({
     connectionString: process.env.AZURE_CONN_STRING,
@@ -131,7 +132,7 @@ router.get("/packages/:id", async (req, res) => {
     }
 });
 
-router.post("/", upload, async (req, res) => {
+router.post("/", auth, upload, async (req, res) => {
     const { description, assignedNumber, label, videoURL, packages, isHD } =
         JSON.parse(req.body.payload);
 
@@ -164,7 +165,7 @@ router.post("/", upload, async (req, res) => {
     }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
     const {
         description,
         assignedNumber,
@@ -214,7 +215,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-router.patch("/packages/:id", async (req, res) => {
+router.patch("/packages/:id", auth, async (req, res) => {
     const { packages } = req.body;
     const { id } = req.params;
 
@@ -245,7 +246,7 @@ router.patch("/packages/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -278,7 +279,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const Application = require("../models/Application");
 const Account = require("../models/Account");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const applications = await Application.find().populate({
             path: "accountID",
@@ -109,7 +110,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.patch("/status/:id", async (req, res) => {
+router.patch("/status/:id", auth, async (req, res) => {
     const { status, step } = req.body;
     const { id } = req.params;
 
@@ -144,7 +145,7 @@ router.patch("/status/:id", async (req, res) => {
     }
 });
 
-router.patch("/account/:id", async (req, res) => {
+router.patch("/account/:id", auth, async (req, res) => {
     const { accountID } = req.body;
     const { id } = req.params;
 
@@ -187,7 +188,7 @@ router.patch("/account/:id", async (req, res) => {
     }
 });
 
-router.patch("/remarks/:id", async (req, res) => {
+router.patch("/remarks/:id", auth, async (req, res) => {
     const { remarks } = req.body;
     const { id } = req.params;
 
@@ -221,7 +222,7 @@ router.patch("/remarks/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -254,7 +255,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

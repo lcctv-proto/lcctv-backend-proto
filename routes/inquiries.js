@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const Inquiry = require("../models/Inquiry");
 const Account = require("../models/Account");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const inquiries = await Inquiry.find({}, "-__v").populate({
             path: "accountID",
@@ -21,7 +22,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -113,7 +114,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.patch("/status/:id", async (req, res) => {
+router.patch("/status/:id", auth, async (req, res) => {
     const { status } = req.body;
     const { id } = req.params;
 
@@ -144,7 +145,7 @@ router.patch("/status/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -174,7 +175,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {

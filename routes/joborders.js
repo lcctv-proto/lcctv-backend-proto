@@ -4,8 +4,9 @@ const Account = require("../models/Account");
 const Application = require("../models/Application");
 const Inquiry = require("../models/Inquiry");
 const Team = require("../models/Team");
+const auth = require("../auth/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const jos = await JobOrder.find({}, "-__v")
             .populate("accountID", "_id accountName")
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -111,7 +112,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/installation", async (req, res) => {
+router.post("/installation", auth, async (req, res) => {
     const { remarks, applicationID, accountID } = req.body;
 
     const jo = new JobOrder({
@@ -151,7 +152,7 @@ router.post("/installation", async (req, res) => {
     }
 });
 
-router.post("/maintenance", async (req, res) => {
+router.post("/maintenance", auth, async (req, res) => {
     const { remarks, inquiryID, accountID } = req.body;
 
     const jo = new JobOrder({
@@ -191,7 +192,7 @@ router.post("/maintenance", async (req, res) => {
     }
 });
 
-router.patch("/team/:id", async (req, res) => {
+router.patch("/team/:id", auth, async (req, res) => {
     const { jobDate, status, branch, teamID } = req.body;
     const { id } = req.params;
 
@@ -240,7 +241,7 @@ router.patch("/team/:id", async (req, res) => {
     }
 });
 
-router.patch("/equipments/:id", async (req, res) => {
+router.patch("/equipments/:id", auth, async (req, res) => {
     const { equipmentsUsed } = req.body;
     const { id } = req.params;
 
@@ -271,7 +272,7 @@ router.patch("/equipments/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -301,7 +302,7 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-router.delete("/hard/:id", async (req, res) => {
+router.delete("/hard/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     try {
