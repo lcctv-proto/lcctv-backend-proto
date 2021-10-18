@@ -173,6 +173,16 @@ router.post("/login/", async (req, res) => {
     }
 });
 
+router.post("/verify/", auth, async (req, res) => {
+    try {
+        if (req.user) return res.status(200).json({ message: "Valid Token!" });
+    } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
