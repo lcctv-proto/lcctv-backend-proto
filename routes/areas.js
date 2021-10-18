@@ -13,7 +13,6 @@ const storage = multerAzure({
     container: "areas",
     blobPathResolver: function (req, file, cb) {
         const blobPath = crypto.randomUUID() + path.extname(file.originalname);
-        console.log(file);
         cb(null, blobPath);
     },
 });
