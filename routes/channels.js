@@ -132,7 +132,7 @@ router.get("/packages/:id", async (req, res) => {
     }
 });
 
-router.post("/", auth, upload, async (req, res) => {
+router.post("/", upload, auth, async (req, res) => {
     const { description, assignedNumber, label, videoURL, packages, isHD } =
         JSON.parse(req.body.payload);
 
