@@ -38,7 +38,7 @@ const upload = multer({
     fileFilter,
 });
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
         const areas = await Area.find({}, "-__v");
 
@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
 
@@ -93,7 +93,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.post("/", auth, upload.single("imageURL"), async (req, res) => {
+router.post("/", upload.single("imageURL"), auth, async (req, res) => {
     const { description } = JSON.parse(req.body.payload);
     const imageURL = req.file.url;
 
