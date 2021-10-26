@@ -6,7 +6,8 @@
     "scripts": {
         "test": "jest --detectOpenHandles",
         "start": "pm2-runtime start ecosystem.config.js --env production",
-        "dev-start": "nodemon --no-deprecation index.js"
+        "dev-start": "nodemon --no-deprecation index.js",
+        "heroku-postbuild": "npm install pm2"
     },
     "repository": {
         "type": "git",
