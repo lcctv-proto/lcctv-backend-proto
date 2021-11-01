@@ -15,11 +15,11 @@ const ApplicationSchema = mongoose.Schema({
     status: {
         type: String,
         uppercase: true,
-        default: "PENDING PAYMENT",
+        default: "PENDING APPROVAL",
     },
     step: {
         type: Number,
-        default: 1,
+        default: 3,
     },
     remarks: {
         type: String,
