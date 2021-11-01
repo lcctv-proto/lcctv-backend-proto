@@ -90,7 +90,6 @@ router.post("/", async (req, res) => {
         type,
         description,
     });
-    console.log(req.body);
 
     try {
         await Account.findOne({
