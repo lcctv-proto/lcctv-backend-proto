@@ -89,19 +89,23 @@ router.post("/", async (req, res) => {
         email,
         type,
         description,
-        accountID,
     });
+    console.log(req.body);
 
     try {
         await Account.findOne({
-            prefix: accountID.toUpperCase().substring(0, 8),
-            acc_ctr: parseInt(accountID.toUpperCase().substring(8), 10),
+            prefix: accountID.toString().toUpperCase().substring(0, 8),
+            acc_ctr: parseInt(
+                accountID.toString().toUpperCase().substring(8),
+                10
+            ),
         })
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
                         .status(404)
                         .json({ message: "Account not found" });
+                inquiry.accountID = account._id;
 
                 const savedInquiry = await inquiry.save();
 
