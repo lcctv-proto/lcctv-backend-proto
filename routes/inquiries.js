@@ -93,7 +93,10 @@ router.post("/", async (req, res) => {
     });
 
     try {
-        await Account.findById(accountID)
+        await Account.findOne({
+            prefix: accountID.toUpperCase().substring(0, 8),
+            acc_ctr: parseInt(accountID.toUpperCase().substring(8), 10),
+        })
             .then(async (account) => {
                 if (account.isDeleted)
                     return res
