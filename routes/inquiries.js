@@ -82,13 +82,15 @@ router.get("/:id", auth, async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { contactNumber, email, type, description, accountID } = req.body;
+    const { contactNumber, email, type, description, accountID, isGenInq } =
+        req.body;
 
     const inquiry = new Inquiry({
         contactNumber,
         email,
         type,
         description,
+        isGenInq,
     });
 
     try {

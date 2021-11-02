@@ -44,6 +44,10 @@ const InquirySchema = mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isGenInq: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 InquirySchema.plugin(AutoIncrement, { inc_field: "inq_ctr" });
