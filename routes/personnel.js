@@ -67,12 +67,13 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
-router.post("/", auth, async (req, res) => {
-    const { personnelName, contactNumber, roleID } = req.body;
+router.post("/", async (req, res) => {
+    const { personnelName, contactNumber, username, roleID } = req.body;
 
     const personnel = new Personnel({
         personnelName,
         contactNumber,
+        username,
         roleID,
     });
 
@@ -86,9 +87,7 @@ router.post("/", auth, async (req, res) => {
 
                 res.status(201).json(savedPersonnel);
             })
-            .catch((err) =>
-                res.status(404).json({ message: "Role not found" })
-            );
+            .catch((err) => res.status(404).json({ message: err }));
     } catch (err) {
         console.log(err);
         res.status(500).json({
