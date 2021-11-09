@@ -89,7 +89,6 @@ router.post("/", async (req, res) => {
             })
             .catch((err) => res.status(404).json({ message: err }));
     } catch (err) {
-        console.log(err);
         res.status(500).json({
             message: "Error. Please contact your administrator.",
         });
@@ -165,7 +164,6 @@ router.post("/login/", async (req, res) => {
 
         res.status(403).json({ message: "Wrong password!" });
     } catch (err) {
-        console.log(err);
         res.status(500).json({
             message: "Error. Please contact your administrator.",
         });

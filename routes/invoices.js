@@ -64,9 +64,10 @@ router.get("/:id", auth, async (req, res) => {
 });
 
 router.post("/", auth, async (req, res) => {
-    const { amountDue, accountID } = req.body;
+    const { feeIDs, amountDue, accountID } = req.body;
 
     const invoice = new Invoice({
+        feeIDs,
         amountDue,
         accountID,
     });

@@ -13,6 +13,7 @@ const InvoiceSchema = mongoose.Schema({
         default: Date.now(),
     },
     amountDue: Number,
+    feeIDs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fees" }],
     accountID: { type: mongoose.Schema.Types.ObjectId, ref: "Accounts" },
     isDeleted: {
         type: Boolean,

@@ -102,16 +102,20 @@ router.post("/", auth, async (req, res) => {
                         .json({ message: "Account not found" });
 
                 await Account.findByIdAndUpdate(accountID, {
-                    $inc: { "billingInfo.accountDebit": amountPaid },
+                    $inc: {
+                        "billingInfo.accountDebit": checkAmount
+                            ? checkAmount
+                            : amountPaid,
+                    },
                 });
 
                 const savedPayment = await payment.save();
 
                 res.status(201).json(savedPayment);
             })
-            .catch((err) =>
-                res.status(404).json({ message: "Account not found" })
-            );
+            .catch((err) => {
+                res.status(404).json({ message: "Account not found" });
+            });
     } catch (err) {
         res.status(500).json({
             message: "Error. Please contact your administrator.",

@@ -63,6 +63,27 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
+router.get("/personnel/:id", auth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await Team.findById(id)
+            .then(async (team) => {
+                if (team.isDeleted)
+                    return res.status(404).json({ message: "Team not found" });
+
+                res.status(200).json([...team.personnelIDs]);
+            })
+            .catch((err) => {
+                res.status(404).json({ message: "Team not found" });
+            });
+    } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 router.post("/", auth, async (req, res) => {
     const { description, areaID } = req.body;
 

@@ -112,6 +112,43 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
+router.get("/team/:id", auth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const jos = await JobOrder.find({}, "-__v")
+            .populate("accountID", "_id accountName")
+            .populate("applicationID", "date status")
+            .populate(
+                "inquiryID",
+                "-_id -prefix -date -inq_ctr -__v -accountID"
+            )
+            .populate({
+                path: "equipmentsUsed",
+                populate: { path: "equipmentID", select: "description price" },
+            });
+
+        Team.findById(id)
+            .then((team) => {
+                if (team.isDeleted)
+                    return res.status(404).json({ message: "Team not found" });
+
+                res.status(200).json(
+                    jos.filter(
+                        (jo) => jo.teamID.toString() === team._id.toString()
+                    )
+                );
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Team not found" })
+            );
+    } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 router.post("/installation", auth, async (req, res) => {
     const { remarks, applicationID, accountID } = req.body;
 
@@ -204,32 +241,34 @@ router.patch("/team/:id", auth, async (req, res) => {
                         .status(404)
                         .json({ message: "Job Order not found" });
 
-                await Team.findById(id).then(async (team) => {
-                    if (team.isDeleted)
-                        return res
-                            .status(404)
-                            .json({ message: "Team not found" });
+                await Team.findById(teamID)
+                    .then(async (team) => {
+                        if (team.isDeleted)
+                            return res
+                                .status(404)
+                                .json({ message: "Team not found" });
 
-                    const updatedJobOrder = await JobOrder.findByIdAndUpdate(
-                        id,
-                        {
-                            $set: {
-                                jobDate,
-                                status,
-                                branch,
-                                teamID,
-                            },
-                        }
+                        const updatedJobOrder =
+                            await JobOrder.findByIdAndUpdate(id, {
+                                $set: {
+                                    jobDate,
+                                    status,
+                                    branch,
+                                    teamID,
+                                },
+                            });
+
+                        res.status(200).json({
+                            ...updatedJobOrder._doc,
+                            jobDate,
+                            status,
+                            branch,
+                            teamID,
+                        });
+                    })
+                    .catch((err) =>
+                        res.status(400).json({ message: "Team not found" })
                     );
-
-                    res.status(200).json({
-                        ...updatedJobOrder._doc,
-                        jobDate,
-                        status,
-                        branch,
-                        teamID,
-                    });
-                });
             })
             .catch((err) =>
                 res.status(404).json({ message: "Job Order not found" })
@@ -240,6 +279,8 @@ router.patch("/team/:id", auth, async (req, res) => {
         });
     }
 });
+
+router.patch("/close/:id", auth, async (req, res) => {});
 
 router.patch("/equipments/:id", auth, async (req, res) => {
     const { equipmentsUsed } = req.body;

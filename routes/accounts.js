@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const Account = require("../models/Account");
 const Package = require("../models/Package");
+const Payment = require("../models/Payment");
+const Invoice = require("../models/Invoice");
 const crypto = require("crypto");
 const path = require("path");
 const multer = require("multer");
@@ -99,6 +101,26 @@ router.get("/:id", auth, async (req, res) => {
             message: "Error. Please contact your administrator.",
         });
     }
+});
+
+router.get("/billing/:id", auth, async (req, res) => {
+    const { id } = req.params;
+
+    await Account.findById(id, "-__v")
+        .populate("packageID", "-__v")
+        .then(async (account) => {
+            if (account.isDeleted)
+                return res.status(404).json({ message: "Account not found" });
+
+            const payments = await Payment.find({ accountID: id });
+            const invoices = await Invoice.find({ accountID: id });
+
+            res.status(200).json({
+                payments,
+                invoices,
+            });
+        })
+        .catch((err) => res.status(404).json({ message: "Account not found" }));
 });
 
 router.post("/", upload, async (req, res) => {
