@@ -115,10 +115,7 @@ router.get("/billing/:id", auth, async (req, res) => {
             const payments = await Payment.find({ accountID: id });
             const invoices = await Invoice.find({ accountID: id });
 
-            res.status(200).json({
-                payments,
-                invoices,
-            });
+            res.status(200).json([...payments, ...invoices]);
         })
         .catch((err) => res.status(404).json({ message: "Account not found" }));
 });
