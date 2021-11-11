@@ -119,3 +119,4 @@ dist
 sampleAccount.txt
 .deployment
 .vscode/settings.json
+utils/edit.js
