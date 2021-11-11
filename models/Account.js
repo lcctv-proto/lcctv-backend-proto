@@ -139,6 +139,10 @@ const AccountSchema = mongoose.Schema({
         type: String,
         trim: true,
     },
+    isNew: {
+        type: Boolean,
+        default: true,
+    },
     isDeleted: {
         type: Boolean,
         default: false,

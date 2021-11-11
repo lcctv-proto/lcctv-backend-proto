@@ -281,6 +281,36 @@ router.patch("/status/:id", auth, async (req, res) => {
     }
 });
 
+router.patch("/oldaccount/:id", auth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await Account.findById(id)
+            .then(async (account) => {
+                if (account.isDeleted)
+                    return res
+                        .status(404)
+                        .json({ message: "Account not found" });
+
+                const updatedAccount = await Account.findByIdAndUpdate(id, {
+                    $set: { isNew: false },
+                });
+
+                res.status(200).json({
+                    ...updatedAccount._doc,
+                    isNew: false,
+                });
+            })
+            .catch((err) =>
+                res.status(404).json({ message: "Account not found" })
+            );
+    } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 router.patch("/address/:id", auth, async (req, res) => {
     const { serviceAddress } = req.body;
     const { id } = req.params;
