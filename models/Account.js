@@ -139,7 +139,7 @@ const AccountSchema = mongoose.Schema({
         type: String,
         trim: true,
     },
-    isNew: {
+    isNewAccount: {
         type: Boolean,
         default: true,
     },

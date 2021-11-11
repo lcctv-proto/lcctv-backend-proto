@@ -293,12 +293,12 @@ router.patch("/oldaccount/:id", auth, async (req, res) => {
                         .json({ message: "Account not found" });
 
                 const updatedAccount = await Account.findByIdAndUpdate(id, {
-                    $set: { isNew: false },
+                    $set: { isNewAccount: false },
                 });
 
                 res.status(200).json({
                     ...updatedAccount._doc,
-                    isNew: false,
+                    isNewAccount: false,
                 });
             })
             .catch((err) =>
