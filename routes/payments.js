@@ -114,7 +114,7 @@ router.post("/", auth, async (req, res) => {
                 res.status(201).json(savedPayment);
             })
             .catch((err) => {
-                res.status(404).json({ message: err });
+                res.status(404).json({ message: "Account not found" });
             });
     } catch (err) {
         res.status(500).json({
