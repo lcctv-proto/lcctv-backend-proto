@@ -28,7 +28,7 @@ const teams = require("./routes/teams");
 
 const port = process.env.PORT || 3000;
 
-morgan("tiny");
+app.use(morgan("dev"));
 app.use(express.json());
 
 //register view engine
