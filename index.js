@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
+const morgan = require("morgan");
+
 require("dotenv").config();
 
 //utils
@@ -26,6 +28,7 @@ const teams = require("./routes/teams");
 
 const port = process.env.PORT || 3000;
 
+morgan("tiny");
 app.use(express.json());
 
 //register view engine
