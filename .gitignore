@@ -120,3 +120,6 @@ sampleAccount.txt
 .deployment
 .vscode/settings.json
 utils/edit.js
+utils/email.js
+utils/cron_jobs.js
+
