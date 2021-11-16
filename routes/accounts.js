@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
 
 const email = new Email({
     message: {
-        from: "accounts@lakecommunity.tech",
+        from: "applications@lakecommunity.tech",
     },
     send: true,
     transport: transporter,
@@ -204,7 +204,7 @@ router.post("/", upload, async (req, res) => {
 
                 email
                     .send({
-                        template: "../emails/account/",
+                        template: "../emails/accounts",
                         message: {
                             to: [
                                 contactInfo.email,

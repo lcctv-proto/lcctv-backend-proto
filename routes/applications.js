@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 
 const email = new Email({
     message: {
-        from: "accounts@lakecommunity.tech",
+        from: "applications@lakecommunity.tech",
     },
     send: true,
     transport: transporter,
