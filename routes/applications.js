@@ -3,6 +3,28 @@ const Application = require("../models/Application");
 const Account = require("../models/Account");
 const auth = require("../auth/auth");
 
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
+
+const transporter = nodemailer.createTransport({
+    host: "us2.smtp.mailhostbox.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL.PASSWORD,
+    },
+    tls: { secureProtocol: "TLSv1_method" },
+});
+
+const email = new Email({
+    message: {
+        from: "accounts@lakecommunity.tech",
+    },
+    send: true,
+    transport: transporter,
+});
+
 router.get("/", auth, async (req, res) => {
     try {
         const applications = await Application.find().populate({
@@ -89,20 +111,33 @@ router.post("/", async (req, res) => {
     });
 
     try {
-        await Account.findById(accountID)
-            .then(async (account) => {
-                if (account.isDeleted)
-                    return res
-                        .status(404)
-                        .json({ message: "Account not found" });
+        await Account.findById(accountID).then(async (account) => {
+            if (account.isDeleted)
+                return res.status(404).json({ message: "Account not found" });
 
-                const savedApplication = await application.save();
+            const savedApplication = await application.save();
 
-                res.status(201).json(savedApplication);
-            })
-            .catch((err) =>
-                res.status(404).json({ message: "Account not found" })
-            );
+            email
+                .send({
+                    template: "../emails/application/",
+                    message: {
+                        to: [
+                            account.contactInfo.email,
+                            "vizcocho.gerarddominic@ue.edu.ph",
+                        ],
+                    },
+                    locals: {
+                        name: account.accountName,
+                        ref_number: `${
+                            savedApplication._doc.prefix
+                        }${savedApplication._doc.ref_ctr
+                            .toString()
+                            .padStart(3, "0")}`,
+                    },
+                })
+                .then(res.status(201).json(savedApplication))
+                .catch(console.error);
+        });
     } catch (err) {
         res.status(500).json({
             message: "Error. Please contact your administrator.",

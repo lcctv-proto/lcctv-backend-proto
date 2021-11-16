@@ -4,6 +4,7 @@ const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
+const cron = require("node-cron");
 
 require("dotenv").config();
 
@@ -89,5 +90,15 @@ app.post("/", async (req, res) => {
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
+
+cron.schedule(
+    "* * * * *",
+    () => {
+        // const accounts = await Account.find({}).populate("packageID");
+        // console.log(accounts);
+        console.log("running a task every minute");
+    },
+    { scheduled: true }
+);
 
 module.exports = app;

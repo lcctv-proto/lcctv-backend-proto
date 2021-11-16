@@ -9,6 +9,28 @@ const multer = require("multer");
 const multerAzure = require("multer-azure");
 const auth = require("../auth/auth");
 
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
+
+const transporter = nodemailer.createTransport({
+    host: "us2.smtp.mailhostbox.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL.PASSWORD,
+    },
+    tls: { secureProtocol: "TLSv1_method" },
+});
+
+const email = new Email({
+    message: {
+        from: "accounts@lakecommunity.tech",
+    },
+    send: true,
+    transport: transporter,
+});
+
 const storage = multerAzure({
     connectionString: process.env.AZURE_CONN_STRING,
     account: process.env.AZURE_ACCOUNT,
@@ -57,6 +79,31 @@ router.get("/", auth, async (req, res) => {
         });
     }
 });
+
+// router.post("/email", async (req, res) => {
+//     try {
+//         email
+//             .send({
+//                 template: "../emails/application/",
+//                 message: {
+//                     to: [
+//                         "vizcochogerard@yahoo.com",
+//                         "vizcocho.gerarddominic@ue.edu.ph",
+//                     ],
+//                 },
+//                 locals: {
+//                     name: "Gerard Vizcocho",
+//                     ref_number: "REF-211116001",
+//                 },
+//             })
+//             .then(res.status(200).json({ message: "Email Success! " }))
+//             .catch(console.error);
+//     } catch (err) {
+//         res.status(500).json({
+//             message: "Error. Please contact your administrator.",
+//         });
+//     }
+// });
 
 router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
@@ -155,7 +202,21 @@ router.post("/", upload, async (req, res) => {
 
                 const savedAccount = await account.save();
 
-                res.status(201).json(savedAccount);
+                email
+                    .send({
+                        template: "../emails/account/",
+                        message: {
+                            to: [
+                                contactInfo.email,
+                                "vizcocho.gerarddominic@ue.edu.ph",
+                            ],
+                        },
+                        locals: {
+                            name: accountName,
+                        },
+                    })
+                    .then(res.status(201).json(savedAccount))
+                    .catch(console.error);
             })
             .catch((err) => {
                 return res.status(404).json({ message: "Package not found" });

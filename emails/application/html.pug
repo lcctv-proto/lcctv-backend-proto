@@ -1,0 +1,18 @@
+html
+    head
+        title Jade Template
+               
+
+    body
+        header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
+            span Lake Community Cable TV
+
+        main(style="padding: 25px")
+            h1 #{ref_number}
+            p Hi #{name.firstName} #{name.lastName},
+            p Your application has been accepted, your reference number is #{ref_number}
+
+        footer(style="background-color: gray; color: white; padding: 10px 5px; text-align: center")
+            span LCCTV
+
+
