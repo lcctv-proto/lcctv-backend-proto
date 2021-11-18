@@ -75,7 +75,7 @@ router.get("/:id", auth, async (req, res) => {
                 );
         } else {
             await JobOrder.findById(id, "-__v")
-                .populate("accountID", "_id accountName")
+                .populate("accountID", "_id accountName serviceAddress")
                 .populate({
                     path: "teamID",
                     populate: { path: "personnelIDs", select: "personnelName" },
