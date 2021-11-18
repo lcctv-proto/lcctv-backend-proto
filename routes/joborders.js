@@ -9,7 +9,14 @@ const auth = require("../auth/auth");
 router.get("/", auth, async (req, res) => {
     try {
         const jos = await JobOrder.find({}, "-__v")
-            .populate("accountID", "_id accountName serviceAddress")
+            .populate({
+                path: "accountID",
+                populate: {
+                    path: "packageID",
+                    select: "_id description price",
+                },
+                select: "_id packageID accountName serviceAddress",
+            })
             .populate({
                 path: "teamID",
                 populate: { path: "personnelIDs", select: "personnelName" },
