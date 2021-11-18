@@ -9,7 +9,7 @@ const auth = require("../auth/auth");
 router.get("/", auth, async (req, res) => {
     try {
         const jos = await JobOrder.find({}, "-__v")
-            .populate("accountID", "_id accountName")
+            .populate("accountID", "_id accountName serviceAddress")
             .populate({
                 path: "teamID",
                 populate: { path: "personnelIDs", select: "personnelName" },
@@ -44,7 +44,7 @@ router.get("/:id", auth, async (req, res) => {
             const jo_ctr = parseInt(id.toUpperCase().substring(9), 10);
 
             await JobOrder.findOne({ prefix, jo_ctr }, "-__v")
-                .populate("accountID", "_id accountName")
+                .populate("accountID", "_id accountName serviceAddress")
                 .populate({
                     path: "teamID",
                     populate: { path: "personnelIDs", select: "personnelName" },

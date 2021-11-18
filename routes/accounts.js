@@ -207,7 +207,7 @@ router.post("/", upload, async (req, res) => {
                         template: "../emails/accounts",
                         message: {
                             to: [
-                                contactInfo.email,
+                                savedAccount.contactInfo.email,
                                 "vizcocho.gerarddominic@ue.edu.ph",
                             ],
                         },
