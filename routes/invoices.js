@@ -100,8 +100,7 @@ router.post("/email", async (req, res) => {
 
                     await Account.findByIdAndUpdate(value._id, {
                         $inc: {
-                            "billingInfo.accountCredit":
-                                account.packageID.price,
+                            "billingInfo.accountCredit": value.packageID.price,
                         },
                     });
 
