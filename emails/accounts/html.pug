@@ -2,13 +2,28 @@ html
     head
         title Jade Template
                
+
     body
         header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
-            span Lake Community Cable TV
+            span LAKE COMMUNITY CABLE TV
 
         main(style="padding: 25px")
-            p Hi #{name.firstName} #{name.lastName},
-            p Thank you for creating an account at Lake Community Cable TV, we will send you another email concerning your application details. Have a nice day!!
+            span(style="font-size:20px;") WELCOME SUBSCRIBER!
+            p(style="font-size:20px; font-weight:bold;") ACCOUNT NUMBER: 20152421512
+            p(style="font-size:20px; font-weight:bold;") PASSWORD: 123456
+            hr
+            br
+            h2 HOW CAN I VIEW MY BILLING SUMMARY?
+            span(style="font-weight:bold; font-size:15px; padding-left:20px; color:red;") VIA WEBSITE: 
+            p(style="font-weight:bold; font-size:15px; padding-left:20px") You can view your current bill and your past billing statement in the last 12 months through our website.
+            p(style="font-weight:bold; font-size:15px; padding-left:20px") Use your account number and password provided above to log-in.
+            br
+            span(style="font-weight:bold; font-size:15px; padding-left:20px; color:red;") VIA EMAIL: 
+            p(style="font-weight:bold; font-size:15px; padding-left:20px") An email notification with your bill summary will be sent to you every first day of the month to your registered email address. In order to view the complete details of your bill.
+            
+            hr
+            br
+            
 
         footer(style="background-color: gray; color: white; padding: 10px 5px; text-align: center")
             span LCCTV
