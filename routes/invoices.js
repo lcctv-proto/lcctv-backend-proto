@@ -120,14 +120,10 @@ router.post("/email", async (req, res) => {
                         .then(console.log)
                         .catch(console.error);
                 })
-                .catch((err) =>
-                    res.status(404).json({ message: "Account not found" })
-                );
+                .catch((err) => console.error(err));
         });
     } catch (err) {
-        res.status(500).json({
-            message: "Error. Please contact your administrator.",
-        });
+        console.error(err);
     }
 });
 
