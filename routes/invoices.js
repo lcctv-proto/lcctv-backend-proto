@@ -113,7 +113,7 @@ router.post("/email", async (req, res) => {
 
                     email
                         .send({
-                            template: "../emails/accounts",
+                            template: "../emails/invoice",
                             message: {
                                 to: [
                                     account.contactInfo.email,
