@@ -110,7 +110,7 @@ router.post("/email", async (req, res) => {
                         account: value,
                     },
                 })
-                .then(res.status(201).json({ message: "Success!" }))
+                .then(console.log)
                 .catch(console.error);
         });
     } catch (err) {
