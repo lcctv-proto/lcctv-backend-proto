@@ -99,7 +99,10 @@ router.post("/email", async (req, res) => {
                         console.log;
 
                     await Account.findByIdAndUpdate(value._id, {
-                        $inc: { "billingInfo.accountCredit": amountDue },
+                        $inc: {
+                            "billingInfo.accountCredit":
+                                account.packageID.price,
+                        },
                     });
 
                     const savedInvoice = await invoice.save();
