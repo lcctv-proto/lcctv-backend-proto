@@ -107,7 +107,7 @@ router.post("/email", async (req, res) => {
                         ],
                     },
                     locals: {
-                        value,
+                        account: value,
                     },
                 })
                 .then(res.status(201).json({ message: "Success!" }))
