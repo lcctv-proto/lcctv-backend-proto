@@ -124,7 +124,7 @@ router.post("/email", async (req, res) => {
                                 account,
                             },
                         })
-                        .then(res.status(201).json(savedInvoice))
+                        .then(console.log)
                         .catch(console.error);
                 })
                 .catch((err) =>
