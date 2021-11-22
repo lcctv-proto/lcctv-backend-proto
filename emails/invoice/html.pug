@@ -10,13 +10,16 @@ html
         main(style="padding: 25px")
             p(style="font-size:20px;font-weight:bold;") DEAR SUBSCRIBER #{account.accountName.firstName} #{account.accountName.lastName},
 
-            p(style="font-size:15px;padding:padding-left:50px;") This is a gentle reminder to settle your monthly fees amounting to ₱ #{account.packageID.price}. 
+            p(style="font-size:15px;padding:padding-left:50px;") This is a gentle reminder to settle your monthly fees amounting to: 
+            p(style="font-size:30px;color: #14274e;") ₱ #{account.packageID.price}. 
             P Kindly settle immediately to avoid penalty.
+
+            br 
             
         header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
             span YOU COULD SETTLE YOUR SETTLE YOUR BALANCE THROUGH THE FOLLOWING PAYMENT OPTIONS:
-        main(style="padding: 25px")
 
+        main(style="padding: 25px")
             p 
 
             span(style="font-size:20px; font-weight:bold;") Option 1. 
