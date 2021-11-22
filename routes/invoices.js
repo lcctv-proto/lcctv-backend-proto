@@ -96,7 +96,7 @@ router.post("/email", async (req, res) => {
             await Account.findById(value._id)
                 .then(async (account) => {
                     if (account.isDeleted || account.accountStatus !== "ACTIVE")
-                        console.log;
+                        return;
 
                     const invoice = new Invoice({
                         amountDue: value.packageID.price,
@@ -115,10 +115,10 @@ router.post("/email", async (req, res) => {
                         .send({
                             template: "../emails/invoice",
                             message: {
-                                to: [value.contactInfo.email],
+                                to: ["umali.charlesedward@ue.edu.ph"],
                             },
                             locals: {
-                                account,
+                                account: value,
                             },
                         })
                         .then(console.log)
