@@ -97,7 +97,7 @@ router.post("/email", async (req, res) => {
                 !account.isDeleted || account.accountStatus === "ACTIVE"
         );
 
-        non_deleted_accounts.map((value) => {
+        non_deleted_accounts.map(async (value) => {
             await Account.findById(value._id)
                 .then(async (account) => {
                     if (account.isDeleted)
