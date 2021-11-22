@@ -92,7 +92,7 @@ router.post("/email", async (req, res) => {
             "-__v"
         );
 
-        non_deleted_accounts.map(async (value) => {
+        accounts.map(async (value) => {
             await Account.findById(value._id)
                 .then(async (account) => {
                     if (account.isDeleted || account.accountStatus !== "ACTIVE")
@@ -109,7 +109,7 @@ router.post("/email", async (req, res) => {
                             template: "../emails/invoice",
                             message: {
                                 to: [
-                                    account.contactInfo.email,
+                                    value.contactInfo.email,
                                     "vizcocho.gerarddominic@ue.edu.ph",
                                 ],
                             },
