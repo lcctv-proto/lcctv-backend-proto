@@ -93,25 +93,43 @@ router.post("/email", async (req, res) => {
         );
 
         const non_deleted_accounts = accounts.filter(
-            (account) => !account.isDeleted
+            (account) =>
+                !account.isDeleted || account.accountStatus === "ACTIVE"
         );
 
         non_deleted_accounts.map((value) => {
-            email
-                .send({
-                    template: "../emails/invoice",
-                    message: {
-                        to: [
-                            value.contactInfo.email,
-                            "vizcocho.gerarddominic@ue.edu.ph",
-                        ],
-                    },
-                    locals: {
-                        account: value,
-                    },
+            await Account.findById(value._id)
+                .then(async (account) => {
+                    if (account.isDeleted)
+                        return res
+                            .status(404)
+                            .json({ message: "Account not found" });
+
+                    await Account.findByIdAndUpdate(value._id, {
+                        $inc: { "billingInfo.accountCredit": amountDue },
+                    });
+
+                    const savedInvoice = await invoice.save();
+
+                    email
+                        .send({
+                            template: "../emails/accounts",
+                            message: {
+                                to: [
+                                    account.contactInfo.email,
+                                    "vizcocho.gerarddominic@ue.edu.ph",
+                                ],
+                            },
+                            locals: {
+                                account,
+                            },
+                        })
+                        .then(res.status(201).json(savedInvoice))
+                        .catch(console.error);
                 })
-                .then(console.log)
-                .catch(console.error);
+                .catch((err) =>
+                    res.status(404).json({ message: "Account not found" })
+                );
         });
     } catch (err) {
         res.status(500).json({
