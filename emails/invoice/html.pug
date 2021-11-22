@@ -8,10 +8,10 @@ html
             span INVOICE
 
         main(style="padding: 25px")
-            p(style="font-size:20px;font-weight:bold;") DEAR SUBSCRIBER,
+            p(style="font-size:20px;font-weight:bold;") DEAR SUBSCRIBER #{account.accountName.firstName} #{account.accountName.lastName},
 
-            p(style="font-size:15px;padding:padding-left:50px;") This is a gentle reminder to settle your payment. Amounting to (₱ 9090). 
-            P Your overdue balance is now (₱ 18181.94). Kindly settle immediately to avoid penalty.
+            p(style="font-size:15px;padding:padding-left:50px;") This is a gentle reminder to settle your monthly fees amounting to ₱ #{account.packageID.price}. 
+            P Kindly settle immediately to avoid penalty.
             
         header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
             span YOU COULD SETTLE YOUR SETTLE YOUR BALANCE THROUGH THE FOLLOWING PAYMENT OPTIONS:

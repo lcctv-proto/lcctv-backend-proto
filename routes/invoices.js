@@ -3,6 +3,28 @@ const Invoice = require("../models/Invoice");
 const Account = require("../models/Account");
 const auth = require("../auth/auth");
 
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
+
+const transporter = nodemailer.createTransport({
+    host: "us2.smtp.mailhostbox.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: { secureProtocol: "TLSv1_method" },
+});
+
+const email = new Email({
+    message: {
+        from: "applications@lakecommunity.tech",
+    },
+    send: true,
+    transport: transporter,
+});
+
 router.get("/", auth, async (req, res) => {
     try {
         const invoices = await Invoice.find({}, "-__v").populate(
@@ -63,6 +85,41 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
+router.post("/email", auth, async (req, res) => {
+    try {
+        const accounts = await Account.find({}, "-__v").populate(
+            "packageID",
+            "-__v"
+        );
+
+        const non_deleted_accounts = accounts.filter(
+            (account) => !account.isDeleted
+        );
+
+        non_deleted_accounts.map((value) => {
+            email
+                .send({
+                    template: "../emails/invoice",
+                    message: {
+                        to: [
+                            value.contactInfo.email,
+                            "vizcocho.gerarddominic@ue.edu.ph",
+                        ],
+                    },
+                    locals: {
+                        value,
+                    },
+                })
+                .then(res.status(201).json(savedInvoice))
+                .catch(console.error);
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
 router.post("/", auth, async (req, res) => {
     const { feeIDs, amountDue, accountID } = req.body;
 
@@ -86,7 +143,21 @@ router.post("/", auth, async (req, res) => {
 
                 const savedInvoice = await invoice.save();
 
-                res.status(201).json(savedInvoice);
+                email
+                    .send({
+                        template: "../emails/accounts",
+                        message: {
+                            to: [
+                                account.contactInfo.email,
+                                "vizcocho.gerarddominic@ue.edu.ph",
+                            ],
+                        },
+                        locals: {
+                            account,
+                        },
+                    })
+                    .then(res.status(201).json(savedInvoice))
+                    .catch(console.error);
             })
             .catch((err) =>
                 res.status(404).json({ message: "Account not found" })

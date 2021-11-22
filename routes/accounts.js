@@ -80,31 +80,6 @@ router.get("/", auth, async (req, res) => {
     }
 });
 
-// router.post("/email", async (req, res) => {
-//     try {
-//         email
-//             .send({
-//                 template: "../emails/application/",
-//                 message: {
-//                     to: [
-//                         "vizcochogerard@yahoo.com",
-//                         "vizcocho.gerarddominic@ue.edu.ph",
-//                     ],
-//                 },
-//                 locals: {
-//                     name: "Gerard Vizcocho",
-//                     ref_number: "REF-211116001",
-//                 },
-//             })
-//             .then(res.status(200).json({ message: "Email Success! " }))
-//             .catch(console.error);
-//     } catch (err) {
-//         res.status(500).json({
-//             message: "Error. Please contact your administrator.",
-//         });
-//     }
-// });
-
 router.get("/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { type } = req.query;
