@@ -85,7 +85,7 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
-router.post("/email", auth, async (req, res) => {
+router.post("/email", async (req, res) => {
     try {
         const accounts = await Account.find({}, "-__v").populate(
             "packageID",

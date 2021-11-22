@@ -91,14 +91,4 @@ app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
-cron.schedule(
-    "* * * * *",
-    () => {
-        // const accounts = await Account.find({}).populate("packageID");
-        // console.log(accounts);
-        console.log("running a task every minute");
-    },
-    { scheduled: true }
-);
-
 module.exports = app;
