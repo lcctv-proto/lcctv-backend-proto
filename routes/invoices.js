@@ -92,18 +92,11 @@ router.post("/email", async (req, res) => {
             "-__v"
         );
 
-        const non_deleted_accounts = accounts.filter(
-            (account) =>
-                !account.isDeleted || account.accountStatus === "ACTIVE"
-        );
-
         non_deleted_accounts.map(async (value) => {
             await Account.findById(value._id)
                 .then(async (account) => {
-                    if (account.isDeleted)
-                        return res
-                            .status(404)
-                            .json({ message: "Account not found" });
+                    if (account.isDeleted || account.accountStatus !== "ACTIVE")
+                        console.log;
 
                     await Account.findByIdAndUpdate(value._id, {
                         $inc: { "billingInfo.accountCredit": amountDue },
