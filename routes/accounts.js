@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
 
 const email = new Email({
     message: {
-        from: "applications@lakecommunity.tech",
+        from: process.env.EMAIL_USERNAME,
     },
     send: true,
     transport: transporter,
