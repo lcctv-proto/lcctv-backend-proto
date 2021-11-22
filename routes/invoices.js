@@ -98,6 +98,11 @@ router.post("/email", async (req, res) => {
                     if (account.isDeleted || account.accountStatus !== "ACTIVE")
                         console.log;
 
+                    const invoice = new Invoice({
+                        amountDue: value.packageID.price,
+                        accountID: value._id,
+                    });
+
                     await Account.findByIdAndUpdate(value._id, {
                         $inc: {
                             "billingInfo.accountCredit": value.packageID.price,
