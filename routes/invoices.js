@@ -110,7 +110,7 @@ router.post("/email", auth, async (req, res) => {
                         value,
                     },
                 })
-                .then(res.status(201).json(savedInvoice))
+                .then(res.status(201).json({ message: "Success!" }))
                 .catch(console.error);
         });
     } catch (err) {
