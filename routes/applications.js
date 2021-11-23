@@ -5,6 +5,7 @@ const auth = require("../auth/auth");
 
 const nodemailer = require("nodemailer");
 const Email = require("email-templates");
+const Invoice = require("../models/Invoice");
 
 const transporter = nodemailer.createTransport({
     host: "us2.smtp.mailhostbox.com",
@@ -21,7 +22,7 @@ const email = new Email({
     message: {
         from: process.env.EMAIL_USERNAME,
     },
-    // send: true,
+    send: true,
     transport: transporter,
 });
 
@@ -190,6 +191,14 @@ router.patch("/status/:id", auth, async (req, res) => {
                                 .then(console.log)
                                 .catch(console.error);
                         } else {
+                            const invoice = new Invoice({
+                                amountDue:
+                                    application.accountID.packageID.price +
+                                    1000,
+                                accountID: application.accountID._id,
+                            });
+
+                            invoice.save();
                             email
                                 .send({
                                     template: "../emails/approval/",

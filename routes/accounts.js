@@ -158,7 +158,7 @@ router.post("/", upload, async (req, res) => {
     const governmentIdImageURL = req.files.governmentIdImageURL[0].url;
     const billingImageURL = req.files.billingImageURL[0].url;
 
-    const password = crypto.randomBytes(32).toString("hex");
+    const password = crypto.randomBytes(8).toString("hex");
 
     const account = new Account({
         accountName,

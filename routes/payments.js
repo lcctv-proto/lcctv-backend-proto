@@ -21,7 +21,7 @@ const email = new Email({
     message: {
         from: process.env.EMAIL_USERNAME,
     },
-    // send: true,
+    send: true,
     transport: transporter,
 });
 
