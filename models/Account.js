@@ -139,6 +139,10 @@ const AccountSchema = mongoose.Schema({
         type: String,
         trim: true,
     },
+    password: {
+        type: String,
+        trim: true,
+    },
     isNewAccount: {
         type: Boolean,
         default: true,

@@ -1,0 +1,26 @@
+html
+    head
+        title Jade Template
+               
+
+    body
+        header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
+            span Lake Community Cable TV
+
+        main(style="padding: 25px")
+            h1 #{ref_number}
+            p Hi #{name.firstName} #{name.lastName},
+            p We are sorry to inform you that your application to our company has been denied. There are several reasons why this happened: 
+            ul 
+                li Inconsistencies in your application and in your documents.
+                li Poor quality of the images that you uploaded.
+                li Your area is deemed unserviceable by our team.
+            
+            p You may try to submit your application at a later time, submit an inquiry through our website, or you may visit our office at: 
+            p Lina Bldg, Brgy.V-B Rizal Avenue Cor. Apolinario Mabini St San Pablo City, 4000 Laguna, Philippines
+            br
+    
+        footer(style="background-color: gray; color: white; padding: 10px 5px; text-align: center")
+            span LCCTV
+
+

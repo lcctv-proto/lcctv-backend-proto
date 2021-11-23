@@ -8,6 +8,7 @@ const path = require("path");
 const multer = require("multer");
 const multerAzure = require("multer-azure");
 const auth = require("../auth/auth");
+const jwt = require("jsonwebtoken");
 
 const nodemailer = require("nodemailer");
 const Email = require("email-templates");
@@ -145,6 +146,31 @@ router.get("/billing/:id", auth, async (req, res) => {
         .catch((err) => res.status(404).json({ message: "Account not found" }));
 });
 
+router.get("/update/all", async (req, res) => {
+    try {
+        const accounts = await Account.find({}, "-__v").populate(
+            "packageID",
+            "-__v"
+        );
+
+        accounts.map(async (value) => {
+            await Account.findById(value._id)
+                .then(async (account) => {
+                    await Account.findByIdAndUpdate(value._id, {
+                        $set: {
+                            password: "12345678",
+                        },
+                    });
+                })
+                .catch((err) => console.error(err));
+        });
+
+        res.status(200).json({ message: "Success!" });
+    } catch (err) {
+        console.error(err);
+    }
+});
+
 router.post("/", upload, async (req, res) => {
     const {
         accountName,
@@ -157,6 +183,8 @@ router.post("/", upload, async (req, res) => {
     const governmentIdImageURL = req.files.governmentIdImageURL[0].url;
     const billingImageURL = req.files.billingImageURL[0].url;
 
+    const password = crypto.randomBytes(32).toString("hex");
+
     const account = new Account({
         accountName,
         additionalInfo,
@@ -165,6 +193,7 @@ router.post("/", upload, async (req, res) => {
         packageID,
         governmentIdImageURL,
         billingImageURL,
+        password,
     });
 
     try {
@@ -177,26 +206,47 @@ router.post("/", upload, async (req, res) => {
 
                 const savedAccount = await account.save();
 
-                email
-                    .send({
-                        template: "../emails/accounts",
-                        message: {
-                            to: [
-                                savedAccount.contactInfo.email,
-                                "vizcocho.gerarddominic@ue.edu.ph",
-                            ],
-                        },
-                        locals: {
-                            name: accountName,
-                        },
-                    })
-                    .then(res.status(201).json(savedAccount))
-                    .catch(console.error);
+                res.status(201).json(savedAccount);
             })
             .catch((err) => {
                 return res.status(404).json({ message: "Package not found" });
             });
     } catch (err) {
+        res.status(500).json({
+            message: "Error. Please contact your administrator.",
+        });
+    }
+});
+
+router.post("/login", async (req, res) => {
+    const { accountNumber, password } = req.body;
+
+    try {
+        const prefix = accountNumber.toUpperCase().substring(0, 8);
+        const acc_ctr = parseInt(accountNumber.toUpperCase().substring(8), 10);
+
+        const account = await Account.findOne(
+            { prefix, acc_ctr },
+            "_id prefix acc_ctr password"
+        );
+
+        if (!account) return res.status(404).send("Username not found!");
+
+        if (password.toString() === account.password.toString()) {
+            const token = jwt.sign(
+                { id: account._id, accountNumber },
+                process.env.TOKEN,
+                {
+                    expiresIn: "1h",
+                }
+            );
+
+            return res.status(200).send({ ...account._doc, token });
+        }
+
+        res.status(403).json({ message: "Wrong password!" });
+    } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: "Error. Please contact your administrator.",
         });

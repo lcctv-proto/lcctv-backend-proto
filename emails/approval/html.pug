@@ -1,0 +1,54 @@
+html
+    head
+        title Jade Template
+               
+
+    body
+        header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
+            span Lake Community Cable TV
+
+        main(style="padding: 25px")
+            h1 #{ref_number}
+            p Hi #{name.firstName} #{name.lastName},
+            p Congratulations! Your application has been successfully approved. You are now one step closer to being connected with our services. 
+            br
+            p You may now proceed to step 2: Payment of your subscription
+    
+        header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
+            span 3 SIMPLE STEPS THAT YOU NEED TO DO, FOR YOU TO BE CONNECTED WITH US
+
+        main(style="padding: 25px")
+            span(style="text-decoration: line-through") 1. Wait for the approval email within 24 hours of this email. You can also visit our website 
+            a(href='https://lakecommunity.tech/applications' style="text-decoration: line-through") (lakecommunity.tech)
+            span(style="text-decoration: line-through") to verify your approval status.
+            br
+            span 2. Pay to our selected payment partners or you can just visit us in our company or click on our website for more Information   
+            a(href='https://lakecommunity.tech/payment') (LCCTV)
+            br
+            span(style ="color:red; font-weight:bold; font-style:italic;padding-left:25px;") if you have paid through our online partners, kindly send your proof of payment to our email  
+            span lakecoop.finance@gmail.com
+            p 3. Wait for the activation of your account.
+
+        header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
+            span SUBSCRIPTION SUMMARY 
+
+        main(style="padding: 25px")
+            table 
+                tr 
+                    td DESCRIPTION 
+                    td AMOUNT 
+                tr 
+                    td #{package.description} MONTHLY FEE
+                    td #{package.price}
+                tr 
+                    td INSTALLATION FEE
+                    td 1000
+                tr 
+                    td TOTAL 
+                    td #{package.price + 1000}
+            hr
+    
+        footer(style="background-color: gray; color: white; padding: 10px 5px; text-align: center")
+            span LCCTV
+
+

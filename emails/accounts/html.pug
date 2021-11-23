@@ -9,8 +9,8 @@ html
 
         main(style="padding: 25px")
             span(style="font-size:20px;") WELCOME SUBSCRIBER!
-            p(style="font-size:20px; font-weight:bold;") ACCOUNT NUMBER: 20152421512
-            p(style="font-size:20px; font-weight:bold;") PASSWORD: 123456
+            p(style="font-size:20px; font-weight:bold;") ACCOUNT NUMBER: #{account.prefix}#{account.acc_ctr.toString().padStart(3, "0")}
+            p(style="font-size:20px; font-weight:bold;") PASSWORD: #{account.password}
             hr
             br
             h2 HOW CAN I VIEW MY BILLING SUMMARY?

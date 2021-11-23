@@ -21,7 +21,7 @@ const email = new Email({
     message: {
         from: process.env.EMAIL_USERNAME,
     },
-    send: true,
+    // send: true,
     transport: transporter,
 });
 
@@ -121,10 +121,7 @@ router.post("/", async (req, res) => {
                 .send({
                     template: "../emails/application/",
                     message: {
-                        to: [
-                            account.contactInfo.email,
-                            "vizcocho.gerarddominic@ue.edu.ph",
-                        ],
+                        to: [account.contactInfo.email],
                     },
                     locals: {
                         name: account.accountName,
@@ -158,11 +155,65 @@ router.patch("/status/:id", auth, async (req, res) => {
                         .json({ message: "Application not found" });
 
                 const updatedApplication = await Application.findByIdAndUpdate(
-                    id,
+                    application._id,
                     {
                         $set: { status, step },
                     }
                 );
+
+                await Application.findById(application._id, "-__v")
+                    .populate({
+                        path: "accountID",
+                        populate: {
+                            path: "packageID",
+                            select: "-__v",
+                        },
+                        select: "-__v",
+                    })
+                    .then((application) => {
+                        if (application.isDeleted)
+                            return res
+                                .status(404)
+                                .json({ message: "Application not found" });
+
+                        if (step == 99) {
+                            email
+                                .send({
+                                    template: "../emails/denied/",
+                                    message: {
+                                        to: [
+                                            application.accountID.contactInfo
+                                                .email,
+                                        ],
+                                    },
+                                })
+                                .then(console.log)
+                                .catch(console.error);
+                        } else {
+                            email
+                                .send({
+                                    template: "../emails/approval/",
+                                    message: {
+                                        to: [
+                                            application.accountID.contactInfo
+                                                .email,
+                                        ],
+                                    },
+                                    locals: {
+                                        name: application.accountID.accountName,
+                                        ref_number: `${
+                                            application.prefix
+                                        }${application.ref_ctr
+                                            .toString()
+                                            .padStart(3, "0")}`,
+                                        package:
+                                            application.accountID.packageID,
+                                    },
+                                })
+                                .then(console.log)
+                                .catch(console.error);
+                        }
+                    });
 
                 res.status(200).json({
                     ...updatedApplication._doc,
@@ -171,6 +222,7 @@ router.patch("/status/:id", auth, async (req, res) => {
                 });
             })
             .catch((err) => {
+                console.log(err);
                 res.status(404).json({ message: "Application not found" });
             });
     } catch (err) {

@@ -3,6 +3,28 @@ const Payment = require("../models/Payment");
 const Account = require("../models/Account");
 const auth = require("../auth/auth");
 
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
+
+const transporter = nodemailer.createTransport({
+    host: "us2.smtp.mailhostbox.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: { secureProtocol: "TLSv1_method" },
+});
+
+const email = new Email({
+    message: {
+        from: process.env.EMAIL_USERNAME,
+    },
+    // send: true,
+    transport: transporter,
+});
+
 router.get("/", auth, async (req, res) => {
     try {
         const payments = await Payment.find({}, "-__v")
@@ -109,7 +131,55 @@ router.post("/", auth, async (req, res) => {
                     },
                 });
 
+                if (account.isNewAccount) {
+                    await Account.findByIdAndUpdate(accountID, {
+                        $set: {
+                            accountStatus: "ACTIVE",
+                            isNewAccount: false,
+                        },
+                    }).then(() => {
+                        email
+                            .send({
+                                template: "../emails/accounts",
+                                message: {
+                                    to: [account.contactInfo.email],
+                                },
+                                locals: {
+                                    account,
+                                },
+                            })
+                            .then(console.log)
+                            .catch(console.error);
+                    });
+                }
+
                 const savedPayment = await payment.save();
+
+                console.log(`PAYMENT ID: ${savedPayment._id}`);
+
+                await Payment.findById(savedPayment._id, "-__v")
+                    .populate("accountID", "-__v")
+                    .populate("feeIDs")
+                    .then((payment) => {
+                        if (payment.isDeleted)
+                            return res
+                                .status(404)
+                                .json({ message: "Payment not found" });
+
+                        email
+                            .send({
+                                template: "../emails/payments",
+                                message: {
+                                    to: [account.contactInfo.email],
+                                },
+                                locals: {
+                                    account,
+                                    payment,
+                                },
+                            })
+                            .then(console.log)
+                            .catch(console.error);
+                    });
 
                 res.status(201).json(savedPayment);
             })

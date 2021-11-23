@@ -21,13 +21,13 @@ html
             br
             hr
             h5 RECEIVED FROM:
-            h2 UMALI, CHARLES EDWARD A. 
+            h2 #{account.accountName.lastName}, #{account.accountName.firstName}
             span(style="color:red;font-size:20px; padding-left:20px;") ACCOUNT NUMBER: 
-            span(style="font-size:20px;") 0939302011369
+            span(style="font-size:20px;") #{account.prefix}#{account.acc_ctr.toString().padStart(3, "0")}
             br
             hr
             h5 PAYMENT METHOD:
-            h3(style="padding-left:20px;") G-CASH
+            h3(style="padding-left:20px;") #{payment.modeOfPayment}
             br
             
         header(style="background-color: #14274e; padding: 10px; color: white; border-bottom: 2px #f0b917 solid")
@@ -35,29 +35,25 @@ html
 
         main(style="padding: 25px")
            
-            <table style="width:50%;text-align:center;">
-                <tr style="background-color:#14274e; color:white;">
-                    <th>CODE</th>
-                    <th>DESCRIPTION</th>
-                    <th>AMOUNT</th>
-                     
-                </tr>
-                <tr>
-                    <td>001</td>
-                    <td>Adam</td>
-                    <td>25</td>
-                </tr>
-                <tr>
-                    <td>002</td>
-                    <td>rahul</td>
-                    <td>27</td>
-                </tr>
-                <tr>
-                    <td>003</td>
-                    <td>john</td>
-                    <td>80</td>
-                </tr>
-            </table>
+            table(style="width:50%;text-align:center")
+                tr(style="background-color:#14274e; color:white;")
+                    th CODE
+                    th DESCRIPTION
+                    th AMOUNT
+                
+                - var total = 0
+                each fee in payment.feeIDs
+                    tr
+                        td #{fee.prefix}#{fee.fee_ctr.toString().padStart(3, "0")}
+                        td #{fee.description}
+                        td #{fee.price}
+                    
+                    - total = total + fee.price 
+
+                tr 
+                    td(colspan=2) TOTAL
+                    td=  total
+                
 
         footer(style="background-color: gray; color: white; padding: 10px 5px; text-align: center")
             span LCCTV
