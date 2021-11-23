@@ -115,7 +115,7 @@ router.post("/email", async (req, res) => {
                         .send({
                             template: "../emails/invoice",
                             message: {
-                                to: ["vizcochogerard@yahoo.com"],
+                                to: [value.contactInfo.email],
                             },
                             locals: {
                                 account: value,
@@ -158,10 +158,7 @@ router.post("/", auth, async (req, res) => {
                     .send({
                         template: "../emails/accounts",
                         message: {
-                            to: [
-                                account.contactInfo.email,
-                                "vizcocho.gerarddominic@ue.edu.ph",
-                            ],
+                            to: [account.contactInfo.email],
                         },
                         locals: {
                             account,

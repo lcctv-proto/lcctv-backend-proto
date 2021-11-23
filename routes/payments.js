@@ -5,6 +5,7 @@ const auth = require("../auth/auth");
 
 const nodemailer = require("nodemailer");
 const Email = require("email-templates");
+const Application = require("../models/Application");
 
 const transporter = nodemailer.createTransport({
     host: "us2.smtp.mailhostbox.com",
@@ -132,6 +133,14 @@ router.post("/", auth, async (req, res) => {
                 });
 
                 if (account.isNewAccount) {
+                    await Application.findOne(
+                        { accountID },
+                        {
+                            $inc: {
+                                step: 1,
+                            },
+                        }
+                    );
                     await Account.findByIdAndUpdate(accountID, {
                         $set: {
                             accountStatus: "ACTIVE",
