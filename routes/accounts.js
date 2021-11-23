@@ -146,31 +146,6 @@ router.get("/billing/:id", auth, async (req, res) => {
         .catch((err) => res.status(404).json({ message: "Account not found" }));
 });
 
-router.get("/update/all", async (req, res) => {
-    try {
-        const accounts = await Account.find({}, "-__v").populate(
-            "packageID",
-            "-__v"
-        );
-
-        accounts.map(async (value) => {
-            await Account.findById(value._id)
-                .then(async (account) => {
-                    await Account.findByIdAndUpdate(value._id, {
-                        $set: {
-                            password: "12345678",
-                        },
-                    });
-                })
-                .catch((err) => console.error(err));
-        });
-
-        res.status(200).json({ message: "Success!" });
-    } catch (err) {
-        console.error(err);
-    }
-});
-
 router.post("/", upload, async (req, res) => {
     const {
         accountName,
