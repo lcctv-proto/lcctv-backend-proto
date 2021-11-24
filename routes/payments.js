@@ -133,14 +133,14 @@ router.post("/", auth, async (req, res) => {
                 });
 
                 if (account.isNewAccount) {
-                    await Application.findOne(
-                        { accountID },
-                        {
-                            $inc: {
-                                step: 1,
-                            },
-                        }
-                    );
+                    // await Application.findOne(
+                    //     { accountID },
+                    //     {
+                    //         $inc: {
+                    //             step: 1,
+                    //         },
+                    //     }
+                    // );
                     await Account.findByIdAndUpdate(accountID, {
                         $set: {
                             accountStatus: "ACTIVE",
